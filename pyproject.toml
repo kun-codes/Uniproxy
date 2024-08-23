@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "proxverter"
 version = "0.1.0"
-description="Cross platform system wide proxy server & TLS Interception library for Python",
+description="Cross platform system wide proxy server & TLS Interception library for Python"
 authors = ["kun-codes <77796630+throwaway69420-69420@users.noreply.github.com>"]
 license = "LGPL-2.0-or-later"
 readme = "README.md"
