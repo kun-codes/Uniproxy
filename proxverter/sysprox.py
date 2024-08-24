@@ -17,19 +17,20 @@ class Proxy:
         '''
         self.ip_address = ip_address
         self.port = port
+        self._prox_instance = None
 
     def get_prox_instance(self):
-        plat = platform.system().lower()
-        if plat == "windows":
-            prox = WinProxy(self.ip_address, self.port)
-        elif plat == "linux":
-            prox = LinuxProxy(self.ip_address, self.port)
-        elif plat == "macos" or plat == "darwin":
-            prox = MacProxy(self.ip_address, self.port)
-        else:
-            raise OSError("Unable to determine the underlying operating system")
-
-        return prox
+        if self._prox_instance is None:
+            plat = platform.system().lower()
+            if plat == "windows":
+                self._prox_instance = WinProxy(self.ip_address, self.port)
+            elif plat == "linux":
+                self._prox_instance = LinuxProxy(self.ip_address, self.port)
+            elif plat == "macos" or plat == "darwin":
+                self._prox_instance = MacProxy(self.ip_address, self.port)
+            else:
+                raise OSError("Unable to determine the underlying operating system")
+        return self._prox_instance
 
     def engage(self):
         '''
