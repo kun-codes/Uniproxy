@@ -12,73 +12,100 @@ class MacProxy:
 
     def set_proxy(self):
         network_services = self.get_network_services()
-        for network_service in network_services:
-            self.set_http_proxy(network_service)
-            self.set_https_proxy(network_service)
+        try:
+            for network_service in network_services:
+                self.set_http_proxy(network_service)
+                self.set_https_proxy(network_service)
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"failed to set proxy services for {network_service}: {e}")
 
     def del_proxy(self):
         network_services = self.get_network_services()
-        for network_service in network_services:
-            subprocess.run(['networksetup', '-setwebproxystate', network_service, 'off'])
-            subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'off'])
+        network_service = None
+        try:
+            for network_service in network_services:
+                subprocess.run(['networksetup', '-setwebproxystate', network_service, 'off'], check=True)
+                subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'off'], check=True)
+        except subprocess.CalledProcessError:
+            raise RuntimeError(f"failed to delete proxy services for {network_service}")
+
 
     def join(self):
-        if not self.set_proxy():
-            raise ValueError(f"Error setting proxy credentials")
+        self.set_proxy()
 
     def get_network_services(self):
-        # get the output of the command networksetup -listallnetworkservices
-        result = subprocess.run(['networksetup', '-listallnetworkservices'], capture_output=True, text=True)
-        network_services = result.stdout.split('\n')
-        network_services = [network_service.strip() for network_service in network_services if
-                            network_service.strip() and "An asterisk" not in network_service]
-        return network_services
+        try:
+            result = subprocess.run(['networksetup', '-listallnetworkservices'], capture_output=True, text=True, check=True)
+            network_services = result.stdout.split('\n')
+            network_services = [network_service.strip() for network_service in network_services if
+                                network_service.strip() and "An asterisk" not in network_service]
+            return network_services
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Failed to get network services: {e}")
 
     def set_http_proxy(self, network_service):
-        subprocess.run(['networksetup', '-setwebproxy', network_service, self.ip_address, self.port])
-        subprocess.run(['networksetup', '-setwebproxystate', network_service, 'on'])
+        try:
+            subprocess.run(['networksetup', '-setwebproxy', network_service, self.ip_address, self.port], check=True)
+            subprocess.run(['networksetup', '-setwebproxystate', network_service, 'on'], check=True)
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Failed to set http proxy for {network_service}: {e}")
 
     def set_https_proxy(self, network_service):
-        subprocess.run(['networksetup', '-setsecurewebproxy', network_service, self.ip_address, self.port])
-        subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'on'])
+        try:
+            subprocess.run(['networksetup', '-setsecurewebproxy', network_service, self.ip_address, self.port], check=True)
+            subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'on'], check=True)
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Failed to set https proxy for {network_service}: {e}")
 
     def set_bypass_domains(self, network_service, domains: list):
-        subprocess.run(['networksetup', '-setproxybypassdomains', network_service] + domains)
+        try:
+            subprocess.run(['networksetup', '-setproxybypassdomains', network_service] + domains, check=True)
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Failed to set bypass domains for {network_service}: {e}")
 
     def get_by_pass_domains(self, network_service):
-        result = subprocess.run(['networksetup', '-getproxybypassdomains', network_service], capture_output=True,
-                                text=True)
+        try:
+            result = subprocess.run(['networksetup', '-getproxybypassdomains', network_service], capture_output=True,
+                                    text=True)
 
-        result = result.stdout.split('\n')
-        return result
+            result = result.stdout.split('\n')
+            return result
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Failed to get bypass domains for {network_service}: {e}")
 
     def get_http_proxy(self, network_service):
-        result = subprocess.run(['networksetup', '-getwebproxy', network_service], capture_output=True, text=True)
-        output = result.stdout
+        try:
+            result = subprocess.run(['networksetup', '-getwebproxy', network_service], capture_output=True, text=True)
+            output = result.stdout
 
-        enabled = self.parse(output, 'Enabled:') == "Yes"
-        server = self.parse(output, 'Server:')
-        port = self.parse(output, 'Port:')
+            enabled = self.parse(output, 'Enabled:') == "Yes"
+            server = self.parse(output, 'Server:')
+            port = self.parse(output, 'Port:')
 
-        return {
-            'enabled': enabled,
-            'server': server,
-            'port': port
-        }
+            return {
+                'enabled': enabled,
+                'server': server,
+                'port': port
+            }
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Failed to get http proxy for {network_service}: {e}")
 
     def get_https_proxy(self, network_service):
-        result = subprocess.run(['networksetup', '-getsecurewebproxy', network_service], capture_output=True, text=True)
-        output = result.stdout
+        try:
+            result = subprocess.run(['networksetup', '-getsecurewebproxy', network_service], capture_output=True, text=True)
+            output = result.stdout
 
-        enabled = self.parse(output, 'Enabled:') == "Yes"
-        server = self.parse(output, 'Server:')
-        port = self.parse(output, 'Port:')
+            enabled = self.parse(output, 'Enabled:') == "Yes"
+            server = self.parse(output, 'Server:')
+            port = self.parse(output, 'Port:')
 
-        return {
-            'enabled': enabled,
-            'server': server,
-            'port': port
-        }
+            return {
+                'enabled': enabled,
+                'server': server,
+                'port': port
+            }
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Failed to get https proxy for {network_service}: {e}")
 
     def parse(self, output, key):
         for line in output.split('\n'):
