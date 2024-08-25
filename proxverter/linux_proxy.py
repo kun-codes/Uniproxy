@@ -1,207 +1,160 @@
-import fileinput
-import multiprocessing
 import os
-import re
 import subprocess
-import sys
+import re
+import ast
 
 
 class LinuxProxy:
-    '''
-    Refers to the linux version of system wide proxy. Refer to `Proxy` class for initializing system wide proxy.
-    '''
-
     def __init__(self, ip_address, port):
-        globals()["pwd"] = __import__("pwd")
-        self.aptconf    = '/etc/apt/apt.conf'
-        self.envconf    = '/etc/environment'
-        self.bashconf   = '/etc/bash.bashrc'
-        self.wgetconf   = '/etc/wgetrc'
         self.ip_address = ip_address
-        self.port       = str(port)
+        self.port = port
 
-        out = subprocess.call("gsettings list-recursively org.gnome.system.proxy", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-        self.gnome = True if not out else False
-        if os.geteuid() != 0:
-            raise OSError("This library requires root privileges")
+        self.__is_gnome = self.__is_gnome()
+        self.__is_kde = self.__is_kde()
 
-        if not os.path.isfile(self.aptconf):
-            fl = open(self.aptconf, 'w')
-            fl.close()
+        if not self.__is_gnome and not self.__is_kde:
+            raise OSError("This library requires GNOME or KDE desktop environment")
 
-    def set_env_vars(self):
-        exists = False
-        for line in fileinput.input(self.envconf, inplace=1):
-            if "proxy" in line:
-                exists = True
-                line = re.sub(r'(.*)_proxy=(.*)', r'\1_proxy="\1://'+self.ip_address+':'+self.port+"/\"\n", line.rstrip())
-            sys.stdout.write(line)
+    def __is_gnome(self):
+        return os.environ.get("XDG_CURRENT_DESKTOP", "").lower() == "gnome"
 
-        if not exists:
-            fl = open(self.envconf, "w")
-            fl.write("PATH=\"/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games\"\n")
-            fl.write("http_proxy=\"http://"+self.ip_address+":"+self.port+"/\"\n")
-            fl.write("https_proxy=\"https://"+self.ip_address+":"+self.port+"/\"\n")
-            fl.write("ftp_proxy=\"ftp://"+self.ip_address+":"+self.port+"/\"\n")
-            fl.write("socks_proxy=\"socks://"+self.ip_address+":"+self.port+"/\"\n")
-            fl.close()
+    def __is_kde(self):
+        return os.environ.get("XDG_CURRENT_DESKTOP", "").lower() == "kde"
 
-    def set_apt_vars(self):
-        exists = False
-        for line in fileinput.input(self.aptconf, inplace=1):
-            if "Acquire::" in line and "Cache" not in line:
-                exists = True
-                line = re.sub(r'Acquire::(.*)::proxy (.*)', r'Acquire::\1::proxy "\1://'+self.ip_address+":"+self.port+"/\";\n", line.rstrip())
-            sys.stdout.write(line)
+    def __get_kde_command(self, command):
+        kde_version = os.environ.get("KDE_SESSION_VERSION", "5")
+        return f"{command}{kde_version}"
 
-        if not exists:
-            fl = open(self.aptconf, "w")
-            fl.write("Acquire::http::proxy \"http://"+self.ip_address+":"+self.port+"/\";\n")
-            fl.write("Acquire::https::proxy \"https://"+self.ip_address+":"+self.port+"/\";\n")
-            fl.write("Acquire::ftp::proxy \"ftp://"+self.ip_address+":"+self.port+"/\";\n")
-            fl.write("Acquire::http::No-Cache \"True\";\n")
-            fl.write("Acquire::socks::proxy \"socks://"+self.ip_address+":"+self.port+"/\";\n")
-            fl.close()
+    def set_proxy(self, is_enable):
+        if is_enable:
+            self.set_enable(is_enable)
+        if self.__is_kde:
+            self.__set_kde_proxy()
+        elif self.__is_gnome:
+            self.__set_gnome_proxy()
 
-    def set_bash_vars(self):
-        exists = False
-        for line in fileinput.input(self.bashconf, inplace=1):
-            if "export" in line:
-                exists = True
-                line = re.sub(r'export (.*)_proxy=(.*)', r'export \1_proxy=\1://'+self.ip_address+':'+self.port+'\n', line.rstrip())
-            sys.stdout.write(line)
+    def set_enable(self, is_enable):
+        if self.__is_kde:
+            kde_command = self.__get_kde_command("kwriteconfig")
+            subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ProxyType", "1" if is_enable else "0"])
+        elif self.__is_gnome:
+            subprocess.run(["gsettings", "set", "org.gnome.system.proxy", "mode", "manual" if is_enable else "none"])
 
-        if not exists:
-            fl = open(self.bashconf, "r+")
-            l  = fl.readlines()
-            fl.close()
+    def __set_kde_proxy(self):
+        kde_command = self.__get_kde_command("kwriteconfig")
 
-            fl = open(self.bashconf, "a")
+        subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpProxy", f"http://{self.ip_address} {self.port}"])
+        subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpsProxy", f"https://{self.ip_address} {self.port}"])
+        subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ftpProxy", f"ftp://{self.ip_address} {self.port}"])
 
-            if not l[-1][-1]=='\n':
-                fl.write("\n")
+    def __set_gnome_proxy(self):
+        subprocess.run(["gsettings", "set", "org.gnome.system.proxy.http", "host", self.ip_address])
+        subprocess.run(["gsettings", "set", "org.gnome.system.proxy.http", "port", self.port])
+        subprocess.run(["gsettings", "set", "org.gnome.system.proxy.https", "host", self.ip_address])
+        subprocess.run(["gsettings", "set", "org.gnome.system.proxy.https", "port", self.port])
+        subprocess.run(["gsettings", "set", "org.gnome.system.proxy.ftp", "host", self.ip_address])
+        subprocess.run(["gsettings", "set", "org.gnome.system.proxy.ftp", "port", self.port])
 
-            fl.write("export http_proxy=http://"+self.ip_address+":"+self.port+"\n")
-            fl.write("export https_proxy=https://"+self.ip_address+":"+self.port+"\n")
-            fl.write("export ftp_proxy=ftp://"+self.ip_address+":"+self.port+"\n")
-            fl.close()
+    def set_bypass_domains(self, domains: list[str]):
+        if self.__is_kde:
+            kde_command = self.__get_kde_command("kwriteconfig")
+            subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "NoProxyFor", ','.join(domains)])
+        elif self.__is_gnome:
+            subprocess.run(["gsettings", "set", "org.gnome.system.proxy", "ignore-hosts", self.format_domains(domains)])
 
-    def set_wget_vars(self):
-        exists = False
-        for line in fileinput.input(self.wgetconf, inplace=1):
-            if not line.startswith("#") and "proxy" in line:
-                exists = True
-                line = re.sub(r'(.*)_proxy=(.*)//(.*)', r'\1_proxy=\1://'+self.ip_address+':'+self.port+'\n', line.rstrip())
-            sys.stdout.write(line)
+    def get_proxy(self):
+        is_enable = self.get_enable()
+        if self.__is_kde:
+            kde_proxy = self.__get_kde_proxy()
+            return {"is_enable": is_enable, **kde_proxy}
+        elif self.__is_gnome:
+            gnome_proxy = self.__get_gnome_proxy()
+            return {"is_enable": is_enable, **gnome_proxy}
 
-        if not exists:
-            fl = open(self.wgetconf, "r+")
-            l  = fl.readlines()
-            fl.close()
+    def get_enable(self):
+        if self.__is_kde:
+            kde_command = self.__get_kde_command("kreadconfig")
+            output = subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ProxyType"], capture_output=True, text=True)
+            return output.stdout.strip() == "1"
+        elif self.__is_gnome:
+            output = subprocess.run(["gsettings", "get", "org.gnome.system.proxy", "mode"], capture_output=True, text=True)
+            return output.stdout.strip() == "manual"
 
-            fl = open(self.wgetconf, "a")
-            if not l[-1][-1]=='\n':
-                fl.write("\n")
+    def __get_kde_proxy(self):
+        kde_command = self.__get_kde_command("kreadconfig")
 
-            fl.write("http_proxy=http://"+self.ip_address+":"+self.port+"\n")
-            fl.write("https_proxy=https://"+self.ip_address+":"+self.port+"\n")
-            fl.write("ftp_proxy=ftp://"+self.ip_address+":"+self.port+"\n")
+        http_proxy = subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpProxy"], capture_output=True, text=True).stdout.strip()
+        https_proxy = subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpsProxy"], capture_output=True, text=True).stdout.strip()
+        ftp_proxy = subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ftpProxy"], capture_output=True, text=True).stdout.strip()
 
-    def set_gsettings(self):
-        def caller(ip_address, port, uid, gid, dhome, logname):
-            os.setgid(gid)
-            os.setuid(uid)
-            os.environ['HOME']    = dhome
-            os.environ['LOGNAME'] = logname
+        http_proxy_ip_address, http_proxy_port = self.extract_ip_and_port(http_proxy)
+        https_proxy_ip_address, https_proxy_port = self.extract_ip_and_port(https_proxy)
+        ftp_proxy_ip_address, ftp_proxy_port = self.extract_ip_and_port(ftp_proxy)
 
-            subprocess.call(f"dbus-launch gsettings set org.gnome.system.proxy mode 'manual'", shell=True)
-            subprocess.call(f"dbus-launch gsettings set org.gnome.system.proxy.http host '{ip_address}'", shell=True)
-            subprocess.call(f"dbus-launch gsettings set org.gnome.system.proxy.http port {port}", shell=True)
-            subprocess.call(f"dbus-launch gsettings set org.gnome.system.proxy.https host '{ip_address}'", shell=True)
-            subprocess.call(f"dbus-launch gsettings set org.gnome.system.proxy.https port {port}", shell=True)
-            subprocess.call(f"dbus-launch gsettings set org.gnome.system.proxy use-same-proxy true", shell=True)
+        return {
+            "http": {
+                "ip_address": http_proxy_ip_address,
+                "port": http_proxy_port
+            },
+            "https": {
+                "ip_address": https_proxy_ip_address,
+                "port": https_proxy_port
+            },
+            "ftp": {
+                "ip_address": ftp_proxy_ip_address,
+                "port": ftp_proxy_port
+            }
+        }
 
-        users = pwd.getpwall()
-        for user in users:
-            if hasattr(user, 'pw_name') and hasattr(user, 'pw_shell'):
-                if (user.pw_shell == "/bin/bash" or user.pw_shell == "bin/sh"):
-                    mp = multiprocessing.Process(target=caller, args=(self.ip_address, self.port, user.pw_uid, user.pw_gid, user.pw_dir, user.pw_name))
-                    mp.daemon = True
-                    mp.start()
-                    mp.join()
+    def __get_gnome_proxy(self):
+        http_proxy_ip_address = subprocess.run(["gsettings", "get", "org.gnome.system.proxy.http", "host"], capture_output=True, text=True).stdout.strip()
+        http_proxy_port = subprocess.run(["gsettings", "get", "org.gnome.system.proxy.http", "port"], capture_output=True, text=True).stdout.strip()
+        https_proxy_ip_address = subprocess.run(["gsettings", "get", "org.gnome.system.proxy.https", "host"], capture_output=True, text=True).stdout.strip()
+        https_proxy_port = subprocess.run(["gsettings", "get", "org.gnome.system.proxy.https", "port"], capture_output=True, text=True).stdout.strip()
+        ftp_proxy_ip_address = subprocess.run(["gsettings", "get", "org.gnome.system.proxy.ftp", "host"], capture_output=True, text=True).stdout.strip()
+        ftp_proxy_port = subprocess.run(["gsettings", "get", "org.gnome.system.proxy.ftp", "port"], capture_output=True, text=True).stdout.strip()
 
-    def rem_wget_vars(self):
-        with open(self.wgetconf, "r+") as f:
-            new_f = f.readlines()
-            f.seek(0)
-            for line in new_f:
-                if "http_proxy" not in line and "https_proxy" not in line and "ftp_proxy" not in line and "socks_proxy" not in line:
-                    f.write(line)
-            f.truncate()
-            f.close()
+        return {
+            "http": {
+                "ip_address": http_proxy_ip_address,
+                "port": http_proxy_port
+            },
+            "https": {
+                "ip_address": https_proxy_ip_address,
+                "port": https_proxy_port
+            },
+            "ftp": {
+                "ip_address": ftp_proxy_ip_address,
+                "port": ftp_proxy_port
+            }
+        }
 
-    def rem_bash_vars(self):
-        with open(self.bashconf, "r+") as f:
-            new_f = f.readlines()
-            f.seek(0)
-            for line in new_f:
-                if "export http_proxy" not in line and "export https_proxy" not in line and "export ftp_proxy" not in line and "export socks_proxy" not in line:
-                    f.write(line)
-            f.truncate()
-            f.close()
+    def get_bypass_domains(self):
+        if self.__is_kde:
+            kde_command = self.__get_kde_command("kreadconfig")
+            output = subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "NoProxyFor"], capture_output=True, text=True)
+            output = output.stdout.strip()
+            bypass_domains = output.split(",") if output else []
+            return bypass_domains
+        elif self.__is_gnome:
+            output = subprocess.run(["gsettings", "get", "org.gnome.system.proxy", "ignore-hosts"], capture_output=True, text=True)
+            output = output.stdout.strip()
+            return ast.literal_eval(output)
 
-    def rem_env_vars(self):
-        with open(self.envconf, "r+") as f:
-            new_f = f.readlines()
-            f.seek(0)
-            for line in new_f:
-                if "http_proxy" not in line and "https_proxy" not in line and "ftp_proxy" not in line and "socks_proxy" not in line:
-                    f.write(line)
-            f.truncate()
-            f.close()
+    def extract_ip_and_port(self, proxy):
+        match = re.match(r'http://([\d\.]+)\s+(\d+)', proxy)
+        if match:
+            ip_address = match.group(1)
+            port = match.group(2)
+            return ip_address, port
+        return None, None
 
-    def rem_apt_vars(self):
-        with open(self.aptconf, "r+") as f:
-            new_f = f.readlines()
-            f.seek(0)
-            for line in new_f:
-                if "Acquire::http" not in line and "Acquire::https" not in line and "Acquire::ftp" not in line and "Acquire::socks" not in line:
-                    f.write(line)
-            f.truncate()
-            f.close()
-
-    def rem_gsettings(self):
-        def caller(ip_address, port, uid, gid, dhome, logname):
-            os.setgid(gid)
-            os.setuid(uid)
-            os.environ['HOME']    = dhome
-            os.environ['LOGNAME'] = logname
-
-            subprocess.call(f"dbus-launch gsettings set org.gnome.system.proxy mode 'none'", shell=True)
-
-        users = pwd.getpwall()
-        for user in users:
-            if hasattr(user, 'pw_name') and hasattr(user, 'pw_shell'):
-                if (user.pw_shell == "/bin/bash" or user.pw_shell == "bin/sh"):
-                    mp = multiprocessing.Process(target=caller, args=(self.ip_address, self.port, user.pw_uid, user.pw_gid, user.pw_dir, user.pw_name))
-                    mp.daemon = True
-                    mp.start()
-                    mp.join()
+    def format_domains(self, domains):
+        formatted_domains = [f"'{domain}'" for domain in domains]
+        return f"\"[{', '.join(formatted_domains)}]\""
 
     def join(self):
-        if self.gnome:
-            self.set_gsettings()
-
-        self.set_env_vars()
-        self.set_apt_vars()
-        self.set_bash_vars()
-        self.set_wget_vars()
+        self.set_proxy(True)
 
     def del_proxy(self):
-        if self.gnome:
-            self.rem_gsettings()
-
-        self.rem_wget_vars()
-        self.rem_bash_vars()
-        self.rem_apt_vars()
-        self.rem_env_vars()
+        self.set_enable(False)
