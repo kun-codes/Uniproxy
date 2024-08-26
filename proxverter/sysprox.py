@@ -1,8 +1,12 @@
 import platform
+from sys import platlibdir
 
-from proxverter.linux_proxy import LinuxProxy
-from proxverter.mac_proxy import MacProxy
-from proxverter.win_proxy import WinProxy
+if platform.system().lower() == "linux":
+    from proxverter.linux_proxy import LinuxProxy
+if platform.system().lower() == "macos" or platform.system().lower() == "darwin":
+    from proxverter.mac_proxy import MacProxy
+if platform.system().lower() == "windows":
+    from proxverter.win_proxy import WinProxy
 
 
 class Proxy:
