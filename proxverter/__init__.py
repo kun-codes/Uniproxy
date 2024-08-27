@@ -2,24 +2,28 @@ import shutil
 import os
 import socket
 import pathlib
+import platform
 
 ## Package Imports
-from . import sysprox as sprox
+
+if platform.system().lower() == "linux":
+    from proxverter.linux_proxy import LinuxProxy
+if platform.system().lower() == "macos" or platform.system().lower() == "darwin":
+    from proxverter.mac_proxy import MacProxy
+if platform.system().lower() == "windows":
+    from proxverter.win_proxy import WinProxy
 
 class Proxverter:
     '''
     The main Proxverter class that accepts creds, setup system wide caches and run proxy servers.
     '''
 
-    def __init__(self, ip, port, sysprox=False):
+    def __init__(self, ip: str, port: int):
         self.ip_address = ip
         self.port       = port
-        self.sysprox    = sysprox
-        self.proxy      = sprox.Proxy(self.ip_address, self.port)
-        self.__check_connection()
-
-        if self.sysprox:
-            self.set_sysprox()
+        self.proxy      = self.__get_proxy_instance()
+        if not self.__check_connection():
+            raise ConnectionError("Unable to connect to the specified address")
 
     def __check_connection(self):
         try:
@@ -28,7 +32,19 @@ class Proxverter:
             s.close()
             return True
         except Exception as e:
+            print(e)
             return False
+
+    def __get_proxy_instance(self):
+        plat = platform.system().lower()
+        if plat == "windows":
+            return WinProxy(self.ip_address, self.port)
+        elif plat == "linux":
+            return LinuxProxy(self.ip_address, self.port)
+        elif plat == "macos" or plat == "darwin":
+            return MacProxy(self.ip_address, self.port)
+        else:
+            raise OSError("Unable to determine the underlying operating system")
 
     def __clear(self):
         try:
@@ -39,7 +55,10 @@ class Proxverter:
             pass
 
     def set_sysprox(self):
-        self.proxy.engage()
+        self.proxy.join()
 
     def del_sysprox(self):
-        self.proxy.cleanup()
+        self.proxy.del_proxy()
+
+        if hasattr(self.proxy, 'refresh'):
+            self.proxy.refresh()
