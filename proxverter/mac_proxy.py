@@ -112,3 +112,33 @@ class MacProxy:
             if line.strip().startswith(key):
                 return line.split(':', 1)[1].strip()
         return None
+
+    def get_default_network_device:
+        try:
+            route_result = subprocess.run(['route','-n', 'get', 'default'], capture_output=True, text=True).stdout.strip()
+            for line in route_result.split('\n'):
+                if line.strip().startswith('interface:'):
+                    return line.split(':', 1)[1].strip()
+
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Failed to get default network service: {e}")
+
+    def get_network_service_name_by_network_device(self, device_name: str):
+        try:
+            result = subprocess.run(['networksetup', '-listallhardwareports'], capture_output=True, text=True)
+            if result.returncode == 0:
+                stdout = result.stdout
+                blocks = stdout.split("Ethernet Address:")
+                for block in blocks:
+                    lines = block.split("\n")
+                    hardware_port = None
+                    device = None
+                    for line in lines:
+                        if line.strip().startswith("Hardware Port:"):
+                            hardware_port = line.strip()[15:].strip()
+                        if line.strip().startswith("Device:"):
+                            device = line.strip()[8:].strip()
+                    if device == device_name:
+                        return hardware_port
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Failed to get network service name by network device ({device_name}): {e}")
