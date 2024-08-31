@@ -156,3 +156,25 @@ class LinuxProxy:
 
     def del_proxy(self):
         self.set_enable(False)
+        if self.__is_kde:
+            kde_command = self.__get_kde_command("kwriteconfig")
+            try:
+                subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ProxyType", "0"], check=True)
+                subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpProxy", ""], check=True)
+                subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpsProxy", ""], check=True)
+                subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ftpProxy", ""], check=True)
+                subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "NoProxyFor", ""], check=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Error deleting proxy: {e}")
+        elif self.__is_gnome:
+            try:
+                subprocess.run(["gsettings", "set", "org.gnome.system.proxy", "mode", "none"], check=True)
+                subprocess.run(["gsettings", "reset", "org.gnome.system.proxy.http", "host"], check=True)
+                subprocess.run(["gsettings", "reset", "org.gnome.system.proxy.http", "port"], check=True)
+                subprocess.run(["gsettings", "reset", "org.gnome.system.proxy.https", "host"], check=True)
+                subprocess.run(["gsettings", "reset", "org.gnome.system.proxy.https", "port"], check=True)
+                subprocess.run(["gsettings", "reset", "org.gnome.system.proxy.ftp", "host"], check=True)
+                subprocess.run(["gsettings", "reset", "org.gnome.system.proxy.ftp", "port"], check=True)
+                subprocess.run(["gsettings", "reset", "org.gnome.system.proxy", "ignore-hosts"], check=True)
+            except subprocess.CalledProcessError as e:
+                print(f"Error deleting proxy: {e}")
