@@ -29,7 +29,6 @@ class WinProxy:
 
     def set_proxy(self):
         try:
-            self.set_key('ProxyEnable', 1)
             #self.set_key('ProxyOverride', u'*.local;<local>')
             self.set_key('ProxyServer', u'%s:%i' % (self.ip_address, self.port))
             return True
@@ -37,9 +36,32 @@ class WinProxy:
             raise ValueError(f"Unable to find the registry path for proxy")
             return False
 
+    def set_enable(self, is_enable):
+        self.set_key('ProxyEnable', 1 if is_enable else 0)
+        self.refresh()
+
+    def get_enable(self):
+        try:
+            return winreg.QueryValueEx(self.regkey, 'ProxyEnable')[0] == 1
+        except FileNotFoundError:
+            return False
+
+    def set_bypass_domains(self, domains: list[str]):
+        self.set_key('ProxyOverride', ';'.join(domains))
+        self.refresh()
+
+    def get_bypass_domains(self):
+        try:
+            return winreg.QueryValueEx(self.regkey, 'ProxyOverride')[0].split(';')
+        except FileNotFoundError:
+            return []
+
     def del_proxy(self):
         try:
             self.set_key('ProxyEnable', 0)
+            self.set_key('ProxyServer', '')
+            self.set_key('ProxyOverride', '')
+            self.refresh()
         except FileNotFoundError:
             pass
 
