@@ -69,5 +69,11 @@ class Proxverter:
     def set_proxy_enabled(self, enable: bool):
         self.proxy.set_enable(enable)
 
+    def set_bypass_domains(self, domains: list[str]):
+        self.proxy.set_bypass_domains(domains)
+
+    def get_bypass_domains(self):
+        return self.proxy.get_bypass_domains()
+
     def get_proxy_enabled(self):
         return self.proxy.get_enable()
