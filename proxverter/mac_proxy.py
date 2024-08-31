@@ -80,7 +80,9 @@ class MacProxy:
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to set bypass domains for {network_service}: {e}")
 
-    def get_bypass_domains(self, network_service):
+    def get_bypass_domains(self, network_service=None):
+        if network_service is None:
+            network_service = self.get_default_network_service()
         try:
             result = subprocess.run(['networksetup', '-getproxybypassdomains', network_service], capture_output=True,
                                     text=True)
