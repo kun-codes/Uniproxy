@@ -155,7 +155,6 @@ class LinuxProxy:
         self.set_proxy()
 
     def del_proxy(self):
-        self.set_enable(False)
         if self.__is_kde:
             kde_command = self.__get_kde_command("kwriteconfig")
             try:
