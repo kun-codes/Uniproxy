@@ -47,11 +47,11 @@ class LinuxProxy:
 
     def __set_gnome_proxy(self):
         subprocess.run(["gsettings", "set", "org.gnome.system.proxy.http", "host", self.ip_address])
-        subprocess.run(["gsettings", "set", "org.gnome.system.proxy.http", "port", self.port])
+        subprocess.run(["gsettings", "set", "org.gnome.system.proxy.http", "port", str(self.port)])
         subprocess.run(["gsettings", "set", "org.gnome.system.proxy.https", "host", self.ip_address])
-        subprocess.run(["gsettings", "set", "org.gnome.system.proxy.https", "port", self.port])
+        subprocess.run(["gsettings", "set", "org.gnome.system.proxy.https", "port", str(self.port)])
         subprocess.run(["gsettings", "set", "org.gnome.system.proxy.ftp", "host", self.ip_address])
-        subprocess.run(["gsettings", "set", "org.gnome.system.proxy.ftp", "port", self.port])
+        subprocess.run(["gsettings", "set", "org.gnome.system.proxy.ftp", "port", str(self.port)])
 
     def set_bypass_domains(self, domains: list[str]):
         if self.__is_kde:
