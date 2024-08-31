@@ -142,3 +142,27 @@ class MacProxy:
                         return hardware_port
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to get network service name by network device ({device_name}): {e}")
+
+    def get_default_network_service(self):
+        default_network_device = self.get_default_network_device()
+        default_network_service = self.get_network_service_name_by_network_device(default_network_device)
+        return default_network_service
+
+    def get_proxy(self):
+        default_network_service = self.get_default_network_service()
+        http_proxy = self.get_http_proxy(default_network_service)
+        https_proxy = self.get_https_proxy(default_network_service)
+
+        is_enable = http_proxy['enabled'] and https_proxy['enabled']
+
+        return {
+            "is_enable": is_enable,
+            "http": {
+                "ip_address": http_proxy['ip_address'],
+                "port": http_proxy['port'],
+            },
+            "https": {
+                "ip_address": https_proxy['ip_address'],
+                "port": https_proxy['port'],
+            }
+        }
