@@ -57,6 +57,12 @@ class Proxverter:
     def join(self):
         self.proxy.join()
 
+    def set_proxy(self):
+        self.proxy.set_proxy()
+
+        if hasattr(self.proxy, 'refresh'):
+            self.proxy.refresh()
+
     def get_proxy(self):
         return self.proxy.get_proxy()
 
