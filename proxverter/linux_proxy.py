@@ -149,7 +149,7 @@ class LinuxProxy:
 
     def format_domains(self, domains):
         formatted_domains = [f"'{domain}'" for domain in domains]
-        return f"\"[{', '.join(formatted_domains)}]\""
+        return f"[{', '.join(formatted_domains)}]"
 
     def join(self):
         self.set_proxy()
