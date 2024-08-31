@@ -47,11 +47,12 @@ class MacProxy:
 
     def set_enable(self, is_enable):
         network_services = self.get_network_services()
+        network_service = None
         try:
             for network_service in network_services:
                 if is_enable:
-                    self.set_http_proxy(network_service)
-                    self.set_https_proxy(network_service)
+                    subprocess.run(['networksetup', '-setwebproxystate', network_service, 'on'], check=True)
+                    subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'on'], check=True)
                 else:
                     subprocess.run(['networksetup', '-setwebproxystate', network_service, 'off'], check=True)
                     subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'off'], check=True)
