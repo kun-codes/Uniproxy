@@ -1,4 +1,5 @@
 import subprocess
+from contextlib import redirect_stdout
 
 
 class MacProxy:
@@ -12,6 +13,7 @@ class MacProxy:
 
     def set_proxy(self):
         network_services = self.get_network_services()
+        network_service = None
         try:
             for network_service in network_services:
                 self.set_http_proxy(network_service)
@@ -43,6 +45,20 @@ class MacProxy:
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to get network services: {e}")
 
+    def set_enable(self, is_enable):
+        network_services = self.get_network_services()
+        try:
+            for network_service in network_services:
+                if is_enable:
+                    self.set_http_proxy(network_service)
+                    self.set_https_proxy(network_service)
+                else:
+                    subprocess.run(['networksetup', '-setwebproxystate', network_service, 'off'], check=True)
+                    subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'off'], check=True)
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Failed to set proxy services for {network_service}: {e}")
+
+
     def set_http_proxy(self, network_service):
         try:
             subprocess.run(['networksetup', '-setwebproxy', network_service, self.ip_address, self.port], check=True)
@@ -63,7 +79,7 @@ class MacProxy:
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to set bypass domains for {network_service}: {e}")
 
-    def get_by_pass_domains(self, network_service):
+    def get_bypass_domains(self, network_service):
         try:
             result = subprocess.run(['networksetup', '-getproxybypassdomains', network_service], capture_output=True,
                                     text=True)
@@ -84,7 +100,7 @@ class MacProxy:
 
             return {
                 'enabled': enabled,
-                'server': server,
+                'ip_address': server,
                 'port': port
             }
         except subprocess.CalledProcessError as e:
@@ -101,7 +117,7 @@ class MacProxy:
 
             return {
                 'enabled': enabled,
-                'server': server,
+                'ip_address': server,
                 'port': port
             }
         except subprocess.CalledProcessError as e:
