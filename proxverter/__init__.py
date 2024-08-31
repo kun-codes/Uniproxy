@@ -54,11 +54,20 @@ class Proxverter:
         except FileNotFoundError:
             pass
 
-    def set_sysprox(self):
+    def set_proxy(self):
         self.proxy.join()
 
-    def del_sysprox(self):
+    def get_proxy(self):
+        self.proxy.get_proxy()
+
+    def delete_proxy(self):
         self.proxy.del_proxy()
 
         if hasattr(self.proxy, 'refresh'):
             self.proxy.refresh()
+
+    def set_proxy_enabled(self, enable: bool):
+        self.proxy.set_enable(enable)
+
+    def get_proxy_enabled(self):
+        self.proxy.get_enable()

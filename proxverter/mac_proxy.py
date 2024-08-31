@@ -62,14 +62,14 @@ class MacProxy:
     def set_http_proxy(self, network_service):
         try:
             subprocess.run(['networksetup', '-setwebproxy', network_service, self.ip_address, self.port], check=True)
-            subprocess.run(['networksetup', '-setwebproxystate', network_service, 'on'], check=True)
+            # subprocess.run(['networksetup', '-setwebproxystate', network_service, 'on'], check=True)
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to set http proxy for {network_service}: {e}")
 
     def set_https_proxy(self, network_service):
         try:
             subprocess.run(['networksetup', '-setsecurewebproxy', network_service, self.ip_address, self.port], check=True)
-            subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'on'], check=True)
+            # subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'on'], check=True)
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to set https proxy for {network_service}: {e}")
 
@@ -123,13 +123,18 @@ class MacProxy:
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to get https proxy for {network_service}: {e}")
 
+    def get_enable(self):
+        http_proxy = self.get_http_proxy(self.get_default_network_service())
+        https_proxy = self.get_https_proxy(self.get_default_network_service())
+        return http_proxy['enabled'] and https_proxy['enabled']
+
     def parse(self, output, key):
         for line in output.split('\n'):
             if line.strip().startswith(key):
                 return line.split(':', 1)[1].strip()
         return None
 
-    def get_default_network_device:
+    def get_default_network_device(self):
         try:
             route_result = subprocess.run(['route','-n', 'get', 'default'], capture_output=True, text=True).stdout.strip()
             for line in route_result.split('\n'):
