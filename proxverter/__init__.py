@@ -58,7 +58,7 @@ class Proxverter:
         self.proxy.join()
 
     def get_proxy(self):
-        self.proxy.get_proxy()
+        return self.proxy.get_proxy()
 
     def delete_proxy(self):
         self.proxy.del_proxy()
@@ -70,4 +70,4 @@ class Proxverter:
         self.proxy.set_enable(enable)
 
     def get_proxy_enabled(self):
-        self.proxy.get_enable()
+        return self.proxy.get_enable()
