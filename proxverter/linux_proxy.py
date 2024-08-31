@@ -153,6 +153,7 @@ class LinuxProxy:
 
     def join(self):
         self.set_proxy()
+        self.set_enable(True)
 
     def del_proxy(self):
         if self.__is_kde:

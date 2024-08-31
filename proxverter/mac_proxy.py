@@ -36,6 +36,7 @@ class MacProxy:
 
     def join(self):
         self.set_proxy()
+        self.set_enable(True)
 
     def get_network_services(self):
         try:

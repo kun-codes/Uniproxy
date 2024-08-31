@@ -44,7 +44,6 @@ class WinProxy:
             pass
 
     def join(self):
-        if not self.set_proxy():
-            raise ValueError(f"Error setting proxy credentials")
-
+        self.set_proxy()
+        self.set_enable(True)
         self.refresh()

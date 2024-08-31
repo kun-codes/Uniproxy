@@ -54,7 +54,7 @@ class Proxverter:
         except FileNotFoundError:
             pass
 
-    def set_proxy(self):
+    def join(self):
         self.proxy.join()
 
     def get_proxy(self):
