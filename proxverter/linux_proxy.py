@@ -140,7 +140,7 @@ class LinuxProxy:
             return ast.literal_eval(output)
 
     def extract_ip_and_port(self, proxy):
-        match = re.match(r'http://([\d\.]+)\s+(\d+)', proxy)
+        match = re.match(r'(http|https|ftp)://([\d\.]+)\s+(\d+)', proxy)
         if match:
             ip_address = match.group(1)
             port = match.group(2)
