@@ -61,14 +61,14 @@ class MacProxy:
 
     def set_http_proxy(self, network_service):
         try:
-            subprocess.run(['networksetup', '-setwebproxy', network_service, self.ip_address, self.port], check=True)
+            subprocess.run(['networksetup', '-setwebproxy', network_service, self.ip_address, str(self.port)], check=True)
             # subprocess.run(['networksetup', '-setwebproxystate', network_service, 'on'], check=True)
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to set http proxy for {network_service}: {e}")
 
     def set_https_proxy(self, network_service):
         try:
-            subprocess.run(['networksetup', '-setsecurewebproxy', network_service, self.ip_address, self.port], check=True)
+            subprocess.run(['networksetup', '-setsecurewebproxy', network_service, self.ip_address, str(self.port)], check=True)
             # subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'on'], check=True)
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to set https proxy for {network_service}: {e}")
