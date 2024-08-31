@@ -25,9 +25,7 @@ class LinuxProxy:
         kde_version = os.environ.get("KDE_SESSION_VERSION", "5")
         return f"{command}{kde_version}"
 
-    def set_proxy(self, is_enable):
-        if is_enable:
-            self.set_enable(is_enable)
+    def set_proxy(self):
         if self.__is_kde:
             self.__set_kde_proxy()
         elif self.__is_gnome:
@@ -154,7 +152,7 @@ class LinuxProxy:
         return f"\"[{', '.join(formatted_domains)}]\""
 
     def join(self):
-        self.set_proxy(True)
+        self.set_proxy()
 
     def del_proxy(self):
         self.set_enable(False)
