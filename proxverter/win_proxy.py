@@ -36,6 +36,37 @@ class WinProxy:
             raise ValueError(f"Unable to find the registry path for proxy")
             return False
 
+    def get_proxy(self):
+        try:
+            is_enable = self.get_enable()
+            proxy_server = winreg.QueryValueEx(self.regkey, 'ProxyServer')[0]
+            proxies = self.extract_proxies(proxy_server)
+            return {
+                "is_enable": is_enable,
+                "http": proxies.get("http", {"ip_address": "", "port": ""}),
+                "https": proxies.get("https", {"ip_address": "", "port": ""}),
+                "ftp": proxies.get("ftp", {"ip_address": "", "port": ""})
+            }
+        except FileNotFoundError:
+            return {
+                "is_enable": False,
+                "http": {"ip_address": "", "port": ""},
+                "https": {"ip_address": "", "port": ""},
+                "ftp": {"ip_address": "", "port": ""}
+            }
+
+    def extract_proxies(self, proxy_server):
+        proxies = {}
+        for proxy in proxy_server.split(';'):
+            if '=' in proxy:
+                protocol, address = proxy.split('=', 1)
+                ip_address, port = address.split(':')
+                proxies[protocol] = {"ip_address": ip_address, "port": port}
+            else:
+                ip_address, port = proxy.split(':')
+                proxies["http"] = {"ip_address": ip_address, "port": port}
+        return proxies
+
     def set_enable(self, is_enable):
         self.set_key('ProxyEnable', 1 if is_enable else 0)
         self.refresh()
@@ -60,7 +91,7 @@ class WinProxy:
         try:
             self.set_key('ProxyEnable', 0)
             self.set_key('ProxyServer', '')
-            self.set_key('ProxyOverride', '')
+            self.set_key('ProxyOverride', '*.local')
             self.refresh()
         except FileNotFoundError:
             pass
