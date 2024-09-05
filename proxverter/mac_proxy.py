@@ -67,15 +67,32 @@ class MacProxy:
 
     def set_http_proxy(self, network_service):
         try:
+            http_proxy_state = self.get_http_proxy(network_service)
+            is_enabled = http_proxy_state['enabled']
+
             subprocess.run(['networksetup', '-setwebproxy', network_service, self.ip_address, str(self.port)], check=True)
-            # subprocess.run(['networksetup', '-setwebproxystate', network_service, 'on'], check=True)
+
+            # since networksetup -setwebproxy turns on the proxy too, we need to turn it off if it was off
+            # this function doesn't change the state of the proxy if it was already on since it would be turned on
+            # by the previous command
+
+            if not is_enabled:
+                subprocess.run(['networksetup', '-setwebproxystate', network_service, 'off'], check=True)
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to set http proxy for {network_service}: {e}")
 
     def set_https_proxy(self, network_service):
         try:
+            https_proxy_state = self.get_https_proxy(network_service)
+            is_enabled = https_proxy_state['enabled']
+
             subprocess.run(['networksetup', '-setsecurewebproxy', network_service, self.ip_address, str(self.port)], check=True)
-            # subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'on'], check=True)
+
+            # since networksetup -setsecurewebproxy turns on the proxy too, we need to turn it off if it was off
+            # this function doesn't change the state of the proxy if it was already on since it would be turned on
+            # by the previous command
+            if not is_enabled:
+                subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'off'], check=True)
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to set https proxy for {network_service}: {e}")
 
