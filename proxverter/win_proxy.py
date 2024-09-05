@@ -93,7 +93,7 @@ class WinProxy:
         try:
             self.set_key('ProxyEnable', 0)
             self.set_key('ProxyServer', '')
-            self.set_key('ProxyOverride', '*.local')
+            self.set_key('ProxyOverride', '<local>')
             self.refresh()
         except FileNotFoundError:
             pass
