@@ -3,6 +3,7 @@ import os
 import socket
 import pathlib
 import platform
+import warnings
 
 ## Package Imports
 
@@ -23,7 +24,7 @@ class Proxverter:
         self.port       = port
         self.proxy      = self.__get_proxy_instance()
         if not self.__check_connection():
-            raise ConnectionError("Unable to connect to the specified address")
+            warnings.warn("Unable to bind to the specified IP and Port.\nPlease check if the IP and Port are correct\n and port is not already in use.")
 
     def __check_connection(self):
         try:
@@ -31,8 +32,7 @@ class Proxverter:
             s.bind(( self.ip_address, self.port ))
             s.close()
             return True
-        except Exception as e:
-            print(e)
+        except Exception:
             return False
 
     def __get_proxy_instance(self):
