@@ -30,6 +30,8 @@ class MacProxy:
                 subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'off'], check=True)
                 subprocess.run(['networksetup', '-setwebproxy', network_service, "", str(0)], check=True)
                 subprocess.run(['networksetup', '-setsecurewebproxy', network_service, "", str(0)], check=True)
+
+                self.set_bypass_domains(network_service, ["*.local", "169.254/16"])
         except subprocess.CalledProcessError:
             raise RuntimeError(f"failed to delete proxy services for {network_service}")
 
