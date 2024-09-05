@@ -62,9 +62,11 @@ class WinProxy:
                 protocol, address = proxy.split('=', 1)
                 ip_address, port = address.split(':')
                 proxies[protocol] = {"ip_address": ip_address, "port": port}
-            else:
+            else:  # in the case when no protocol is specified, it is used for http, https and ftp
                 ip_address, port = proxy.split(':')
                 proxies["http"] = {"ip_address": ip_address, "port": port}
+                proxies["https"] = {"ip_address": ip_address, "port": port}
+                proxies["ftp"] = {"ip_address": ip_address, "port": port}
         return proxies
 
     def set_enable(self, is_enable):
