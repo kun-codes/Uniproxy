@@ -31,7 +31,7 @@ class MacProxy:
                 subprocess.run(['networksetup', '-setwebproxystate', network_service, 'off'], check=True)
                 subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'off'], check=True)
 
-                self.set_bypass_domains(network_service, ["*.local", "169.254/16"])
+            self.set_bypass_domains(["*.local", "169.254/16"])
         except subprocess.CalledProcessError:
             raise RuntimeError(f"failed to delete proxy services for {network_service}")
 
@@ -79,9 +79,15 @@ class MacProxy:
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to set https proxy for {network_service}: {e}")
 
-    def set_bypass_domains(self, network_service, domains: list):
+    def set_bypass_domains(self, domains: list[str], network_service=None):
+        if network_service is None:
+            network_services = self.get_network_services()
+        else:
+            network_services = [network_service]
+
         try:
-            subprocess.run(['networksetup', '-setproxybypassdomains', network_service] + domains, check=True)
+            for service in network_services:
+                subprocess.run(['networksetup', '-setproxybypassdomains', service] + domains, check=True)
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to set bypass domains for {network_service}: {e}")
 
