@@ -26,10 +26,10 @@ class MacProxy:
         network_service = None
         try:
             for network_service in network_services:
-                subprocess.run(['networksetup', '-setwebproxystate', network_service, 'off'], check=True)
-                subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'off'], check=True)
                 subprocess.run(['networksetup', '-setwebproxy', network_service, "", str(0)], check=True)
                 subprocess.run(['networksetup', '-setsecurewebproxy', network_service, "", str(0)], check=True)
+                subprocess.run(['networksetup', '-setwebproxystate', network_service, 'off'], check=True)
+                subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'off'], check=True)
 
                 self.set_bypass_domains(network_service, ["*.local", "169.254/16"])
         except subprocess.CalledProcessError:
