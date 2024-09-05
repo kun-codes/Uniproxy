@@ -93,6 +93,7 @@ class MacProxy:
                                     text=True)
 
             result = result.stdout.split('\n')
+            result = [domain for domain in result if domain.strip()]
             return result
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to get bypass domains for {network_service}: {e}")
