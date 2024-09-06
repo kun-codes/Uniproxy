@@ -179,7 +179,7 @@ class MacProxy:
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to get default network service: {e}")
 
-    def get_default_network_device_by_ns(self):
+    def get_default_network_service_by_ns(self):
         try:
             result = subprocess.run(['networksetup', '-listallnetworkservices'], capture_output=True, text=True).stdout.strip()
             lines = result.split('\n')
@@ -224,7 +224,7 @@ class MacProxy:
     def get_default_network_service(self):
         default_network_device = self.get_default_network_device()
         if default_network_device is None:
-            default_network_service = self.get_default_network_device_by_ns()
+            default_network_service = self.get_default_network_service_by_ns()
         else:
             default_network_service = self.get_network_service_name_by_network_device(default_network_device)
 
