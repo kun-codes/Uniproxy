@@ -229,7 +229,7 @@ class MacProxy:
             default_network_service = self.get_network_service_name_by_network_device(default_network_device)
 
         if default_network_service is None:
-            raise RuntimeError("Failed to get default network service")
+            raise RuntimeError("Failed to get default network service. Check if there are any network services available.")
 
         return default_network_service
 
