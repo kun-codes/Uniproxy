@@ -169,12 +169,37 @@ class MacProxy:
     def get_default_network_device(self):
         try:
             route_result = subprocess.run(['route','-n', 'get', 'default'], capture_output=True, text=True).stdout.strip()
-            for line in route_result.split('\n'):
-                if line.strip().startswith('interface:'):
-                    return line.split(':', 1)[1].strip()
+            if not "route: writing to routing socket:" in route_result:  # happens when machine is not connected to any network
+                for line in route_result.split('\n'):
+                    if line.strip().startswith('interface:'):
+                        return line.split(':', 1)[1].strip()
+            else:
+                return None  # return None if machine is not connected to any network
 
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to get default network service: {e}")
+
+    def get_default_network_device_by_ns(self):
+        try:
+            result = subprocess.run(['networksetup', '-listallnetworkservices'], capture_output=True, text=True).stdout.strip()
+            lines = result.split('\n')
+            if len(lines) > 1:  # above command returns nothing if there is no network service
+                lines.pop(0)
+
+            default_network_service = None
+
+            for line in lines:
+                if line.strip().startswith('*'):  # skip the deactivated network service
+                    continue
+                else:
+                    default_network_service = line.strip()
+                    break
+
+            return default_network_service
+
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(f"Failed to get default network service by network service: {e}")
+
 
     def get_network_service_name_by_network_device(self, device_name: str):
         try:
@@ -198,7 +223,14 @@ class MacProxy:
 
     def get_default_network_service(self):
         default_network_device = self.get_default_network_device()
-        default_network_service = self.get_network_service_name_by_network_device(default_network_device)
+        if default_network_device is None:
+            default_network_service = self.get_default_network_device_by_ns()
+        else:
+            default_network_service = self.get_network_service_name_by_network_device(default_network_device)
+
+        if default_network_service is None:
+            raise RuntimeError("Failed to get default network service")
+
         return default_network_service
 
     def get_proxy(self):
