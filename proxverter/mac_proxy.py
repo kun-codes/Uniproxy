@@ -183,8 +183,9 @@ class MacProxy:
         try:
             result = subprocess.run(['networksetup', '-listallnetworkservices'], capture_output=True, text=True).stdout.strip()
             lines = result.split('\n')
+            lines = [line for line in lines if line.strip()]
             if len(lines) > 1:  # above command returns nothing if there is no network service
-                lines.pop(0)
+                lines.pop(0)   # remove the first line which is "An asterisk (*) denotes that a network service is disabled."
 
             default_network_service = None
 
@@ -195,11 +196,10 @@ class MacProxy:
                     default_network_service = line.strip()
                     break
 
-            return default_network_service
+            return default_network_service if default_network_service else None
 
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to get default network service by network service: {e}")
-
 
     def get_network_service_name_by_network_device(self, device_name: str):
         try:
