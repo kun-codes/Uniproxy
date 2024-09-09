@@ -197,6 +197,9 @@ class LinuxProxy:
         self.unset_bypass_domains_env_var()
 
     def set_proxy_env_var(self):
+        """
+        Sets the proxy environment variables. Only works on Systemd based systems.
+        """
         xdg_config_home_path = xdg_config_home()
         env_file_path = os.path.join(xdg_config_home_path, "environment.d", "01-proxy.conf")
 
@@ -227,6 +230,9 @@ class LinuxProxy:
         self.refresh_env_var()
 
     def set_bypass_domains_env_var(self, domains:list[str]):
+        """
+        Sets the domains which bypass the proxy. Only works on Systemd based systems.
+        """
         xdg_config_home_path = xdg_config_home()
         env_file_path = os.path.join(xdg_config_home_path, "environment.d", "02-bypass-domains.conf")
 

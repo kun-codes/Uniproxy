@@ -46,6 +46,9 @@ class ShellEnvVar:
 
 
     def set_proxy_env_var(self):
+        """
+        Sets the proxy environment variables in supported shell configuration files
+        """
         for shell in self.shells:
             if not shell["installed"]:
                 continue
@@ -77,6 +80,9 @@ class ShellEnvVar:
                     f.write(f'set -x RSYNC_PROXY "rsync://{self.ip_address}:{self.port}/"\n')
 
     def unset_proxy_env_var(self):
+        """
+        Unsets the proxy environment variables in supported shell configuration files
+        """
         for shell in self.shells:
             if not shell["installed"]:
                 continue
@@ -117,6 +123,9 @@ class ShellEnvVar:
             pass
 
     def set_bypass_domains_env_var(self):
+        """
+        Sets the no_proxy and NO_PROXY environment variables in supported shell configuration
+        """
         for shell in self.shells:
             if not shell["installed"]:
                 continue
@@ -137,6 +146,9 @@ class ShellEnvVar:
                     f.write(f'set -x NO_PROXY "{bypass_domains_str}"\n')
 
     def unset_bypass_domains_env_var(self):
+        """
+        Unsets the no_proxy and NO_PROXY environment variables in supported shell configuration
+        """
         for shell in self.shells:
             if not shell["installed"]:
                 continue

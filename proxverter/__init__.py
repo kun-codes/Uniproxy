@@ -15,10 +15,6 @@ if platform.system().lower() == "windows":
     from proxverter.win_proxy import WinProxy
 
 class Proxverter:
-    '''
-    The main Proxverter class that accepts creds, setup system wide caches and run proxy servers.
-    '''
-
     def __init__(self, ip: str, port: int):
         self.ip_address = ip
         self.port       = port
@@ -55,31 +51,55 @@ class Proxverter:
             pass
 
     def join(self):
+        """
+        Sets the proxy server in OS settings and enables the proxy.
+        """
         self.proxy.join()
 
     def set_proxy(self):
+        """
+        Sets the proxy server in OS settings without enabling the proxy.
+        """
         self.proxy.set_proxy()
 
         if hasattr(self.proxy, 'refresh'):
             self.proxy.refresh()
 
     def get_proxy(self):
+        """
+        Gets the proxy settings in a dict.
+        """
         return self.proxy.get_proxy()
 
     def delete_proxy(self):
+        """
+        Disconnects from proxy and reset proxy settings to OS defaults.
+        """
         self.proxy.del_proxy()
 
         if hasattr(self.proxy, 'refresh'):
             self.proxy.refresh()
 
     def set_proxy_enabled(self, enable: bool):
+        """
+        Sets the proxy to be enabled or disabled.
+        """
         self.proxy.set_enable(enable)
 
     def set_bypass_domains(self, domains: list[str]):
+        """
+        Sets the domains which bypass the proxy.
+        """
         self.proxy.set_bypass_domains(domains)
 
     def get_bypass_domains(self):
+        """
+        Gets the domains in a list which bypass the proxy.
+        """
         return self.proxy.get_bypass_domains()
 
     def get_proxy_enabled(self):
+        """
+        Gets if the proxy is enabled or not.
+        """
         return self.proxy.get_enable()

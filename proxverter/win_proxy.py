@@ -2,10 +2,6 @@ import winreg
 import ctypes
 
 class WinProxy:
-    '''
-    Refers to the windows version of system wide proxy. Refer to `Proxy` class for initializing system wide proxy.
-    '''
-
     def __init__(self, ip_address, port):
 
         self.regkey = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r'Software\Microsoft\Windows\CurrentVersion\Internet Settings', 0, winreg.KEY_ALL_ACCESS)
@@ -29,7 +25,6 @@ class WinProxy:
 
     def set_proxy(self):
         try:
-            #self.set_key('ProxyOverride', u'*.local;<local>')
             self.set_key('ProxyServer', u'%s:%i' % (self.ip_address, self.port))
             return True
         except IndexError:

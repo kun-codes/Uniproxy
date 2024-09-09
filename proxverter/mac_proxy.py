@@ -47,6 +47,9 @@ class MacProxy:
         self.set_enable(True)
 
     def get_network_services(self):
+        """
+        Get the list of network services available on the macOS device
+        """
         try:
             result = subprocess.run(['networksetup', '-listallnetworkservices'], capture_output=True, text=True, check=True)
             network_services = result.stdout.split('\n')
@@ -176,6 +179,10 @@ class MacProxy:
             raise RuntimeError(f"Failed to get https proxy for {network_service}: {e}")
 
     def get_enable(self):
+        """
+        Get if proxy is enabled or not. Only checks for default network service which is determined by
+        get_default_network_service()
+        """
         http_proxy = self.get_http_proxy(self.get_default_network_service())
         https_proxy = self.get_https_proxy(self.get_default_network_service())
         return http_proxy['enabled'] and https_proxy['enabled']
@@ -187,6 +194,10 @@ class MacProxy:
         return None
 
     def get_default_network_device(self):
+        """
+        Get default network device by parsing the output of `route -n get default`. Returns None is machine is not
+        connected to any network.
+        """
         try:
             route_result = subprocess.run(['route','-n', 'get', 'default'], capture_output=True, text=True).stdout.strip()
             if not "route: writing to routing socket:" in route_result:  # happens when machine is not connected to any network
@@ -200,6 +211,10 @@ class MacProxy:
             raise RuntimeError(f"Failed to get default network service: {e}")
 
     def get_default_network_service_by_ns(self):
+        """
+        Get default network service by parsing the output of `networksetup -listallnetworkservices`.
+        Returns the first enabled network service. Returns None if no such network service is found.
+        """
         try:
             result = subprocess.run(['networksetup', '-listallnetworkservices'], capture_output=True, text=True).stdout.strip()
             lines = result.split('\n')
@@ -222,6 +237,9 @@ class MacProxy:
             raise RuntimeError(f"Failed to get default network service by network service: {e}")
 
     def get_network_service_name_by_network_device(self, device_name: str):
+        """
+        Returns the network service name by network device name.
+        """
         try:
             result = subprocess.run(['networksetup', '-listallhardwareports'], capture_output=True, text=True)
             if result.returncode == 0:
@@ -242,6 +260,11 @@ class MacProxy:
             raise RuntimeError(f"Failed to get network service name by network device ({device_name}): {e}")
 
     def get_default_network_service(self):
+        """
+        Returns the default network service determined by get_default_network_device(). If get_default_network_device()
+        fails to find a default network device then get_default_network_service_by_ns() is used to find the default
+        network service
+        """
         default_network_device = self.get_default_network_device()
         if default_network_device is None:
             default_network_service = self.get_default_network_service_by_ns()
