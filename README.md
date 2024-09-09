@@ -2,7 +2,7 @@
 
 <p align="center"><img src="https://img.shields.io/static/v1?label=requirements&message=up%20to%20date&color=green&logo=list"/> <img src="https://img.shields.io/static/v1?label=python&message=%3E=3.7&color=blue&logo=python" /> <img src="https://img.shields.io/static/v1?label=docs&message=80%25&color=orange&logo=doc" /> <img src="https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgrey" /></p>
 
-<h1 align="center">Proxverter</h1>
+<h1 align="center">Uniproxy</h1>
 Cross platform system wide proxy server & TLS Interception library for Python. Basically a wrapper around proxy.py and PyOpenSSL allowing easy integration and certificate generation on command.
 
 ## Features
@@ -13,7 +13,7 @@ Cross platform system wide proxy server & TLS Interception library for Python. B
   <li><b>Custom Plugins</b>: Through the API you can provide custom plugins to intercept and modify data as per your needs. Documentation regarding plugin development is given below</li>
   <li><b>System wide proxy</b>: The tool provides system wide proxy. You just have to call the API and the library will do the rest</li>
   <li><b>Certificate Generation</b>: You can generate self-signed certificate which is basically a wrapper around <code>pyopenssl</code></li>
-  <li><b>Flexible</b>: The underlying code of Proxverter is documented and quite easy to understand and edit. The code can further be developer and reused easily. </li>
+  <li><b>Flexible</b>: The underlying code of Uniproxy is documented and quite easy to understand and edit. The code can further be developer and reused easily. </li>
   <li><b>Lightweight</b>: Thanks to <code>proxy.py</code>, unlike <code>mitmproxy</code> and other interception tools, proxverter is lightweight and doesn't really carry that much space around. </li>
   <li><b>Logging</b>: Proper logging support with verbose mode. The modes when combined can be used to suppress errors as well</li>
   <li><b>Modifying data on the fly</b>: Since the library support TLS interception, the plugins can be used to modify data on the fly or reject any kind of request. </li>
@@ -21,7 +21,7 @@ Cross platform system wide proxy server & TLS Interception library for Python. B
 
 ## Installation
 ### Requirements
-Proxverter requires `openssl` for reading and managing private & public keys in certificates. Actually this is a dependency in `proxy.py` and we are hoping to have it removed soon with the usage of `pyopenssl`. Install openssl first:
+Uniproxy requires `openssl` for reading and managing private & public keys in certificates. Actually this is a dependency in `proxy.py` and we are hoping to have it removed soon with the usage of `pyopenssl`. Install openssl first:
 ```
 $ choco install openssl      ## Windows
 $ apt install openssl        ## Debian
@@ -37,8 +37,8 @@ $ pip3 install proxverter
 ### Development Version
 
 ```bash
-$ git clone https://github.com/hash3liZer/Proxverter.git
-$ cd Proxverter/
+$ git clone https://github.com/hash3liZer/Uniproxy.git
+$ cd Uniproxy/
 $ python3 setup.py install
 ```
 
@@ -46,12 +46,14 @@ $ python3 setup.py install
 After installation, you should be able to import `proxverter` on your python terminal. As of now, the library has 2 major sub modules which are: `certgen` and `sysprox`. The use of both of them is disucussed in the later sections.
 
 ### HTTP Interception
+
 ```python
-import proxverter
-prox = proxverter.Proxverter(ip="127.0.0.1", port=8081, verbose=False)     ## Verbose mode will also show logs
-prox.set_sysprox()                                                         ## Set system wide proxy
-prox.engage()                                                              ## Press CTRL+C to move further
-prox.del_sysprox()                                                         ## Remove system wide proxy
+import uniproxy
+
+prox = uniproxy.Uniproxy(ip="127.0.0.1", port=8081, verbose=False)  ## Verbose mode will also show logs
+prox.set_sysprox()  ## Set system wide proxy
+prox.engage()  ## Press CTRL+C to move further
+prox.del_sysprox()  ## Remove system wide proxy
 ```
 
 This will start proxy server in the background. Now, you can verify the working of proxy using `curl`:
@@ -60,16 +62,18 @@ $ curl -L -x 127.0.0.1:8081 http://www.google.com
 ```
 
 ### TLS Interception (HTTPS)
+
 ```python
-import proxverter
-prox = proxverter.Proxverter(ip="127.0.0.1", port=8081, is_https=True, verbose=False)    ## Verbose mode will also show logs
+import uniproxy
+
+prox = uniproxy.Uniproxy(ip="127.0.0.1", port=8081, is_https=True, verbose=False)  ## Verbose mode will also show logs
 
 ## Get certificate
-prox.fetch_cert("/tmp/certificate.pem")                      
+prox.fetch_cert("/tmp/certificate.pem")
 
-prox.set_sysprox()                                                         ## Set system wide proxy
-prox.engage()                                                              ## Press CTRL+C to move further
-prox.del_sysprox()                                                         ## Remove system wide proxy
+prox.set_sysprox()  ## Set system wide proxy
+prox.engage()  ## Press CTRL+C to move further
+prox.del_sysprox()  ## Remove system wide proxy
 ```
 
 The line `prox.fetch_cert` will generate a certificate at `/tmp/certificate.pem`. You need to import this certifcate in system root keychain or browser ceritifcates in order to capture TLS traffic.
@@ -84,10 +88,10 @@ Altough, there would be no need of private key for this to capture the traffic. 
 prox.fetch_pkey("/tmp/key.pem")
 ```
 
-The certificates and key are only generated for the first time the library is called. After that when you call the `engage` method, the previous certificates will be used. However, if you want to refresh certifcates and have newly generated certs, you have to pass the option `new_certs=True` to `Proxverter` instance:
+The certificates and key are only generated for the first time the library is called. After that when you call the `engage` method, the previous certificates will be used. However, if you want to refresh certifcates and have newly generated certs, you have to pass the option `new_certs=True` to `Uniproxy` instance:
 
 ```python
-prox = proxverter.Proxverter(ip="127.0.0.1", port=8081, new_certs=True)
+prox = proxverter.Uniproxy(ip="127.0.0.1", port=8081, new_certs=True)
 ```
 
 The TLS interception for SSL mode can be tested using this command:
@@ -98,11 +102,12 @@ $ curl -L -x 127.0.0.1:8081 https://www.google.com
 ### Interception with automatic system wide proxy
 By default, when you call the `engage` method, proxvetrer will not automatically create a system wide proxy cache or in other words, you will have to setup the proxy yourself for the software you are targeting.
 
-However, if you do want the proxverter to handle this case for you and create a system wide proxy cache i.e. traffic from the host will pass through our proxverter instance, you will have to pass the argument `sysprox=True` to `Proxverter` instance:
+However, if you do want the proxverter to handle this case for you and create a system wide proxy cache i.e. traffic from the host will pass through our proxverter instance, you will have to pass the argument `sysprox=True` to `Uniproxy` instance:
 
 ```python
-import proxverter
-prox = proxverter.Proxverter(ip="127.0.0.1", port=8081, sysprox=True)
+import uniproxy
+
+prox = uniproxy.Uniproxy(ip="127.0.0.1", port=8081, sysprox=True)
 
 prox.engage()
 ...
@@ -116,8 +121,9 @@ In the above section, we actually fetched the certificate using `fetch_cert` met
 Note that, it only import the certificate in system keychain which means that every software which uses certificate from the system root store will work but eventually you still will have to import certificate in softwares which don't. An example is Firefox.
 
 ```python
-import proxverter
-prox = proxverter.Proxverter(ip="127.0.0.1", port=8081, is_https=True)
+import uniproxy
+
+prox = uniproxy.Uniproxy(ip="127.0.0.1", port=8081, is_https=True)
 
 prox.import_cert()
 ```
@@ -126,29 +132,30 @@ prox.import_cert()
 Let's talk about logs from `proxy.py` tool. By default when the proxverter instance is created, all the logs are suppressed. However, you will be able to see the errors if occured any from `proxy.py`. For this we have argument: `verbose`. If you want to see the all the logs especially from `proxy.py`, you can set `verbose=True` in proxverter instance:
 
 ```python
-import proxverter
-prox = proxverter.Proxverter(ip="127.0.0.1", port=8081, verbose=True)
+import uniproxy
+
+prox = uniproxy.Uniproxy(ip="127.0.0.1", port=8081, verbose=True)
 prox.engage()
 ```
 
 ## Generating Self Signed Certificates
-Besides from TLS Interception, another purpose of `proxverter` is to generate certificates on command. This is different from the certificates and keys generated by `Proxverter` instance.
+Besides from TLS Interception, another purpose of `proxverter` is to generate certificates on command. This is different from the certificates and keys generated by `Uniproxy` instance.
 
 ```python
-from proxverter.certgen import Generator
+from uniproxy.certgen import Generator
 
 gen = Generator()
-gen.generate()         ## Generate certificate and stores in memory
+gen.generate()  ## Generate certificate and stores in memory
 
-gen.gen_key("/tmp/key.pem")     ## Public Certificate
-gen.gen_cert("/tmp/cert.pem")   ## Private Key
-gen.gen_pfx("/tmp/cert.pfx")    ## Certificate in PFX format to be be imported in windows keychain
+gen.gen_key("/tmp/key.pem")  ## Public Certificate
+gen.gen_cert("/tmp/cert.pem")  ## Private Key
+gen.gen_pfx("/tmp/cert.pfx")  ## Certificate in PFX format to be be imported in windows keychain
 ```
 
 This would generate credentials for a single certificate. If you need another certificate, you will need to create a separate instance. For example, if you want to generate 2 certificates, then:
 
 ```python
-from proxverter.certgen import Generator
+from uniproxy.certgen import Generator
 
 gen1 = Generator()
 gen2 = Generator()
@@ -160,16 +167,16 @@ gen2 = Generator()
 A certificate accepts a number of fields like email, country, unit name etc. By default all these fields are left empty. However, you can specify these fields in `Generator` instance.
 
 ```python
-from proxverter.certgen import Generator
+from uniproxy.certgen import Generator
 
 gen = Generator(
-  email="admin@shellvoide.com",
-  country="PK",                      ## Country code here
-  province="Islamabad Capital Territory",
-  locality="Islamabad",
-  organization="localhost",
-  unit="localhost",
-  commonname="example.com"
+    email="admin@shellvoide.com",
+    country="PK",  ## Country code here
+    province="Islamabad Capital Territory",
+    locality="Islamabad",
+    organization="localhost",
+    unit="localhost",
+    commonname="example.com"
 )
 gen.generate()
 
@@ -180,7 +187,7 @@ gen.generate()
 Like other usages, `proxverter` can also be used to create a system wide proxy. This allows the host to forward all the traffic of the host to the proxy that was mentioned in system wide proxy instance.
 
 ```python
-from proxverter.sysprox import Proxy
+from uniproxy.sysprox import Proxy
 
 ## Setting system wide proxy
 sprox = Proxy(ip_address="127.0.0.1", port=8081)
@@ -195,24 +202,26 @@ sprox.cleanup()
 ```
 
 ## Plugins
-Now, plugins are an important part of **Proxverter**. In previous section, we only viewed how to tunnel system traffic through our proxy. But how to actually modify traffic? This is where plugins come into play. Before we further dive deep into plugins. I once again want to to thank abhinavsingh for all the major work on his project `proxy.py`. Let's start creating a new plugin. The plugin class is to be inherited by `PluginBase` and passed to `proxverter` instance:
+Now, plugins are an important part of **Uniproxy**. In previous section, we only viewed how to tunnel system traffic through our proxy. But how to actually modify traffic? This is where plugins come into play. Before we further dive deep into plugins. I once again want to to thank abhinavsingh for all the major work on his project `proxy.py`. Let's start creating a new plugin. The plugin class is to be inherited by `PluginBase` and passed to `proxverter` instance:
 
 ```python
-import proxverter
-from proxverter.plugins import PluginBase
+import uniproxy
+from uniproxy.plugins import PluginBase
+
 
 class CustomPlugin(PluginBase):
 
-  def name(self):
-    return "Custom Plugin for testing"
+    def name(self):
+        return "Custom Plugin for testing"
 
-p = proxverter.Proxverter(
-      "127.0.0.1",
-      8800,
-      is_https=True,
-      plugins=[
+
+p = uniproxy.Uniproxy(
+    "127.0.0.1",
+    8800,
+    is_https=True,
+    plugins=[
         CustomPlugin
-      ]
+    ]
 )
 
 p.engage()
@@ -235,7 +244,7 @@ The function must return orignal/modified request object. Returning `None` will 
 class CustomPlugin(PluginBase):
 
   def intercept_request(self, request):
-    request.add_header("Proxy", "Proxverter (@hash3liZer)")
+    request.add_header("Proxy", "Uniproxy (@hash3liZer)")
     return request
 ```
 

@@ -8,13 +8,13 @@ import warnings
 ## Package Imports
 
 if platform.system().lower() == "linux":
-    from proxverter.linux_proxy import LinuxProxy
+    from uniproxy.linux_proxy import LinuxProxy
 if platform.system().lower() == "macos" or platform.system().lower() == "darwin":
-    from proxverter.mac_proxy import MacProxy
+    from uniproxy.mac_proxy import MacProxy
 if platform.system().lower() == "windows":
-    from proxverter.win_proxy import WinProxy
+    from uniproxy.win_proxy import WinProxy
 
-class Proxverter:
+class Uniproxy:
     def __init__(self, ip: str, port: int):
         self.ip_address = ip
         self.port       = port

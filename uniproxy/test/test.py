@@ -24,7 +24,7 @@
 # if __name__ == "__main__":
 #     multiprocessing.freeze_support()
 #
-#     p = proxverter.Proxverter(
+#     p = proxverter.Uniproxy(
 #         "127.0.0.1",
 #         8700,
 #         is_https=True,

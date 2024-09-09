@@ -1,7 +1,7 @@
 import subprocess
 from contextlib import redirect_stdout
 
-from proxverter.shell_env_var import ShellEnvVar
+from uniproxy.shell_env_var import ShellEnvVar
 
 
 class MacProxy:
