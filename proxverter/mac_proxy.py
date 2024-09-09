@@ -1,10 +1,12 @@
 import subprocess
 from contextlib import redirect_stdout
 
+from proxverter.shell_env_var import ShellEnvVar
+
 
 class MacProxy:
     '''
-    Refers to the macos version of system wide proxy. Refer to `Proxy` class for initializing system-wide proxy.
+    Refers to the macOS version of system-wide proxy. Refer to `Proxy` class for initializing system-wide proxy.
     '''
 
     def __init__(self, ip_address, port):
@@ -18,6 +20,11 @@ class MacProxy:
             for network_service in network_services:
                 self.set_http_proxy(network_service)
                 self.set_https_proxy(network_service)
+
+            if self.get_enable():
+                shell_env_var = ShellEnvVar(self.ip_address, self.port, self.get_bypass_domains())
+                shell_env_var.set_proxy_env_var()
+
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"failed to set proxy services for {network_service}: {e}")
 
@@ -34,7 +41,6 @@ class MacProxy:
             self.set_bypass_domains(["*.local", "169.254/16"])
         except subprocess.CalledProcessError:
             raise RuntimeError(f"failed to delete proxy services for {network_service}")
-
 
     def join(self):
         self.set_proxy()
@@ -61,6 +67,15 @@ class MacProxy:
                 else:
                     subprocess.run(['networksetup', '-setwebproxystate', network_service, 'off'], check=True)
                     subprocess.run(['networksetup', '-setsecurewebproxystate', network_service, 'off'], check=True)
+
+            shell_env_var = ShellEnvVar(self.ip_address, self.port, self.get_bypass_domains())
+            if is_enable:
+                shell_env_var.set_proxy_env_var()
+                shell_env_var.set_bypass_domains_env_var()
+            else:
+                shell_env_var.unset_proxy_env_var()
+                shell_env_var.unset_bypass_domains_env_var()
+
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to set proxy services for {network_service}: {e}")
 
@@ -105,6 +120,11 @@ class MacProxy:
         try:
             for service in network_services:
                 subprocess.run(['networksetup', '-setproxybypassdomains', service] + domains, check=True)
+
+            if self.get_enable():
+                shell_env_var = ShellEnvVar(self.ip_address, self.port, domains)
+                shell_env_var.set_bypass_domains_env_var()
+
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to set bypass domains for {network_service}: {e}")
 
