@@ -32,7 +32,8 @@ class LinuxProxy:
         elif self.__is_gnome:
             self.__set_gnome_proxy()
 
-        self.set_proxy_env_var()
+        if self.get_enable():
+            self.set_proxy_env_var()
 
     def set_enable(self, is_enable):
         if self.__is_kde:
@@ -41,9 +42,15 @@ class LinuxProxy:
         elif self.__is_gnome:
             subprocess.run(["gsettings", "set", "org.gnome.system.proxy", "mode", "manual" if is_enable else "none"])
 
+        if is_enable:
+            self.set_proxy_env_var()
+            self.set_bypass_domains_env_var(self.get_bypass_domains())
+        else:
+            self.unset_proxy_env_var()
+            self.unset_bypass_domains_env_var()
+
     def __set_kde_proxy(self):
-        # kde_command = self.__get_kde_command("kwriteconfig")
-        kde_command = "kwriteconfig5"
+        kde_command = self.__get_kde_command("kwriteconfig")
 
         subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpProxy", f"http://{self.ip_address} {self.port}"])
         subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpsProxy", f"https://{self.ip_address} {self.port}"])
@@ -64,7 +71,8 @@ class LinuxProxy:
         elif self.__is_gnome:
             subprocess.run(["gsettings", "set", "org.gnome.system.proxy", "ignore-hosts", self.format_domains(domains)])
 
-        self.set_bypass_domains_env_var(domains)
+        if self.get_enable():
+            self.set_bypass_domains_env_var(domains)
 
     def get_proxy(self):
         is_enable = self.get_enable()
