@@ -1,5 +1,6 @@
 import winreg
 import ctypes
+import subprocess
 
 class WinProxy:
     def __init__(self, ip_address, port):
@@ -26,10 +27,15 @@ class WinProxy:
     def set_proxy(self):
         try:
             self.set_key('ProxyServer', u'%s:%i' % (self.ip_address, self.port))
+
+            if self.get_enable():
+                self.set_proxy_env_var()
+
             return True
         except IndexError:
             raise ValueError(f"Unable to find the registry path for proxy")
             return False
+
 
     def get_proxy(self):
         try:
@@ -66,6 +72,14 @@ class WinProxy:
 
     def set_enable(self, is_enable):
         self.set_key('ProxyEnable', 1 if is_enable else 0)
+
+        if is_enable:
+            self.set_proxy_env_var()
+            self.set_bypass_domains_env_var()
+        else:
+            self.unset_proxy_env_var()
+            self.unset_bypass_domains_env()
+
         self.refresh()
 
     def get_enable(self):
@@ -76,6 +90,10 @@ class WinProxy:
 
     def set_bypass_domains(self, domains: list[str]):
         self.set_key('ProxyOverride', ';'.join(domains))
+
+        if self.get_enable():
+            self.set_bypass_domains_env_var()
+
         self.refresh()
 
     def get_bypass_domains(self):
@@ -97,3 +115,41 @@ class WinProxy:
         self.set_proxy()
         self.set_enable(True)
         self.refresh()
+
+    def set_proxy_env_var(self):
+        self.unset_proxy_env_var()
+        try:
+            subprocess.run(["setx", "http_proxy", f"http://{self.ip_address}:{self.port}/"], shell=True, check=True)
+            subprocess.run(["setx", "HTTP_PROXY", f"http://{self.ip_address}:{self.port}/"], shell=True, check=True)
+            subprocess.run(["setx", "https_proxy", f"https://{self.ip_address}:{self.port}/"], shell=True, check=True)
+            subprocess.run(["setx", "HTTPS_PROXY", f"https://{self.ip_address}:{self.port}/"], shell=True, check=True)
+            subprocess.run(["setx", "ftp_proxy", f"ftp://{self.ip_address}:{self.port}/"], shell=True, check=True)
+            subprocess.run(["setx", "FTP_PROXY", f"ftp://{self.ip_address}:{self.port}/"], shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            raise ValueError(f"Unable to set proxy environment variables: {e}")
+
+    def unset_proxy_env_var(self):
+        try:
+            subprocess.run(["setx", "http_proxy", ""], shell=True, check=True)
+            subprocess.run(["setx", "HTTP_PROXY", ""], shell=True, check=True)
+            subprocess.run(["setx", "https_proxy", ""], shell=True, check=True)
+            subprocess.run(["setx", "HTTPS_PROXY", ""], shell=True, check=True)
+            subprocess.run(["setx", "ftp_proxy", ""], shell=True, check=True)
+            subprocess.run(["setx", "FTP_PROXY", ""], shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            raise ValueError(f"Unable to unset proxy environment variables: {e}")
+
+    def set_bypass_domains_env_var(self):
+        self.unset_bypass_domains_env_var()
+        try:
+            subprocess.run(["setx", "no_proxy", ",".join(self.get_bypass_domains())], shell=True, check=True)
+            subprocess.run(["setx", "NO_PROXY", ",".join(self.get_bypass_domains())], shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            raise ValueError(f"Unable to set bypass domains environment variables: {e}")
+
+    def unset_bypass_domains_env_var(self):
+        try:
+            subprocess.run(["setx", "no_proxy", ""], shell=True, check=True)
+            subprocess.run(["setx", "NO_PROXY", ""], shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            raise ValueError(f"Unable to unset bypass domains environment variables: {e}")
