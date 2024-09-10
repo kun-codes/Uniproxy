@@ -142,8 +142,8 @@ class WinProxy:
     def set_bypass_domains_env_var(self):
         self.unset_bypass_domains_env_var()
         try:
-            subprocess.run(["setx", "no_proxy", ",".join(self.get_bypass_domains())], shell=True, check=True)
-            subprocess.run(["setx", "NO_PROXY", ",".join(self.get_bypass_domains())], shell=True, check=True)
+            subprocess.run(["setx", "no_proxy", f'"{",".join(self.get_bypass_domains())}"'], shell=True, check=True)
+            subprocess.run(["setx", "NO_PROXY", f'"{",".join(self.get_bypass_domains())}"'], shell=True, check=True)
         except subprocess.CalledProcessError as e:
             raise ValueError(f"Unable to set bypass domains environment variables: {e}")
 
