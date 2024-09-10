@@ -44,7 +44,7 @@ class LinuxProxy:
 
         if is_enable:
             self.set_proxy_env_var()
-            self.set_bypass_domains_env_var(self.get_bypass_domains())
+            self.set_bypass_domains_env_var()
         else:
             self.unset_proxy_env_var()
             self.unset_bypass_domains_env_var()
@@ -72,7 +72,7 @@ class LinuxProxy:
             subprocess.run(["gsettings", "set", "org.gnome.system.proxy", "ignore-hosts", self.format_domains(domains)])
 
         if self.get_enable():
-            self.set_bypass_domains_env_var(domains)
+            self.set_bypass_domains_env_var()
 
     def get_proxy(self):
         is_enable = self.get_enable()
@@ -229,7 +229,7 @@ class LinuxProxy:
 
         self.refresh_env_var()
 
-    def set_bypass_domains_env_var(self, domains:list[str]):
+    def set_bypass_domains_env_var(self):
         """
         Sets the domains which bypass the proxy. Only works on Systemd based systems.
         """
@@ -240,8 +240,8 @@ class LinuxProxy:
 
         with open(env_file_path, "a") as f:
             # https://www.freedesktop.org/software/systemd/man/latest/environment.d.html
-            f.write(f"no_proxy={','.join(domains)}\n")
-            f.write(f"NO_PROXY={','.join(domains)}\n")
+            f.write(f"no_proxy={','.join(self.get_bypass_domains())}\n")
+            f.write(f"NO_PROXY={','.join(self.get_bypass_domains())}\n")
 
         self.refresh_env_var()
 
