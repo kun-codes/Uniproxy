@@ -78,7 +78,7 @@ class WinProxy:
             self.set_bypass_domains_env_var()
         else:
             self.unset_proxy_env_var()
-            self.unset_bypass_domains_env()
+            self.unset_bypass_domains_env_var()
 
         self.refresh()
 
@@ -104,7 +104,7 @@ class WinProxy:
 
     def del_proxy(self):
         try:
-            self.set_key('ProxyEnable', 0)
+            self.set_enable(False)
             self.set_key('ProxyServer', '')
             self.set_key('ProxyOverride', '<local>')
             self.refresh()
@@ -153,4 +153,3 @@ class WinProxy:
             subprocess.run(["setx", "NO_PROXY", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
         except subprocess.CalledProcessError as e:
             raise ValueError(f"Unable to unset bypass domains environment variables: {e}")
-        
