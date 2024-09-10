@@ -10,6 +10,9 @@
 <h1 align="center">Uniproxy</h1>
 <p align="center">Cross-platform python library to set system-wide proxy and proxy bypass domains.</p>
 
+> [!IMPORTANT]
+> Uniproxy doesn't provide a proxy server. It only sets the system-wide proxy settings.
+
 ## Features
 
 - **Cross Platform:** Uniproxy is cross-platform and can be used on Windows, macOS and Linux.
@@ -17,8 +20,6 @@
 - **Bypassing Domains:** Uniproxy can be used to set bypass domains which don't go through the system-wide proxy.
 - **Environment Variables:** Uniproxy can also set environment variables for the proxy.
 
-> [!IMPORTANT]
-> Uniproxy doesn't provide a proxy server. It only sets the system-wide proxy settings.
 
 ## Installation
 
