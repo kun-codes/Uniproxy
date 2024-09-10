@@ -1,4 +1,4 @@
-![banner]([https://gist.github.com/user-attachments/assets/0dc52d53-e415-4c1c-bd38-6300521672e9](https://gistcdn.githack.com/kun-codes/238e08354c3aede326d34a9694627314/raw/6fcfcb7399ee70e4dc204c1168d1d2ea74b995f9/uniproxy-banner.svg))
+![banner](https://gistcdn.githack.com/kun-codes/238e08354c3aede326d34a9694627314/raw/6fcfcb7399ee70e4dc204c1168d1d2ea74b995f9/uniproxy-banner.svg)
 
 <div align="center">
     <img alt="GitHub License" src="https://img.shields.io/github/license/kun-codes/Uniproxy">
