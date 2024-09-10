@@ -1,15 +1,27 @@
 [tool.poetry]
-name = "proxverter"
+name = "uniproxy"
 version = "0.1.0"
-description="Cross platform system wide proxy server & TLS Interception library for Python"
+description="Cross platform python library to set system-wide proxy and bypass domains for proxy."
 authors = ["kun-codes <77796630+throwaway69420-69420@users.noreply.github.com>"]
 license = "LGPL-2.0-or-later"
 readme = "README.md"
+repository = "https://github.com/kun-codes/Uniproxy"
+keywords = ["proxy", "system-wide", "cross-platform", "bypass domains"]
+classifiers = [
+    "Topic :: Internet :: Proxy Servers",
+    "Topic :: System :: Networking",
+    "Topic :: Software Development :: Libraries",
+    "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
 xdg = "^6.0.0"
-
 
 [build-system]
 requires = ["poetry-core"]
