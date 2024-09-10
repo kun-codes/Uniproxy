@@ -61,8 +61,8 @@ class ShellEnvVar:
                 with open(shell_rc, 'a') as f:
                     f.write(f'export http_proxy="http://{self.ip_address}:{self.port}/"\n')
                     f.write(f'export HTTP_PROXY="http://{self.ip_address}:{self.port}/"\n')
-                    f.write(f'export https_proxy="https://{self.ip_address}:{self.port}/"\n')
-                    f.write(f'export HTTPS_PROXY="https://{self.ip_address}:{self.port}/"\n')
+                    f.write(f'export https_proxy="http://{self.ip_address}:{self.port}/"\n')
+                    f.write(f'export HTTPS_PROXY="http://{self.ip_address}:{self.port}/"\n')
                     f.write(f'export ftp_proxy="ftp://{self.ip_address}:{self.port}/"\n')
                     f.write(f'export FTP_PROXY="ftp://{self.ip_address}:{self.port}/"\n')
                     f.write(f'export rsync_proxy="rsync://{self.ip_address}:{self.port}/"\n')
@@ -72,8 +72,8 @@ class ShellEnvVar:
                 with open(shell_rc, 'a') as f:
                     f.write(f'set -x http_proxy "http://{self.ip_address}:{self.port}/"\n')
                     f.write(f'set -x HTTP_PROXY "http://{self.ip_address}:{self.port}/"\n')
-                    f.write(f'set -x https_proxy "https://{self.ip_address}:{self.port}/"\n')
-                    f.write(f'set -x HTTPS_PROXY "https://{self.ip_address}:{self.port}/"\n')
+                    f.write(f'set -x https_proxy "http://{self.ip_address}:{self.port}/"\n')
+                    f.write(f'set -x HTTPS_PROXY "http://{self.ip_address}:{self.port}/"\n')
                     f.write(f'set -x ftp_proxy "ftp://{self.ip_address}:{self.port}/"\n')
                     f.write(f'set -x FTP_PROXY "ftp://{self.ip_address}:{self.port}/"\n')
                     f.write(f'set -x rsync_proxy "rsync://{self.ip_address}:{self.port}/"\n')

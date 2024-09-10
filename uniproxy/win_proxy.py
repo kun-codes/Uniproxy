@@ -121,8 +121,8 @@ class WinProxy:
         try:
             subprocess.run(["setx", "http_proxy", f"http://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
             subprocess.run(["setx", "HTTP_PROXY", f"http://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
-            subprocess.run(["setx", "https_proxy", f"https://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
-            subprocess.run(["setx", "HTTPS_PROXY", f"https://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
+            subprocess.run(["setx", "https_proxy", f"http://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
+            subprocess.run(["setx", "HTTPS_PROXY", f"http://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
             subprocess.run(["setx", "ftp_proxy", f"ftp://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
             subprocess.run(["setx", "FTP_PROXY", f"ftp://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
         except subprocess.CalledProcessError as e:

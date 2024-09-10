@@ -53,7 +53,7 @@ class LinuxProxy:
         kde_command = self.__get_kde_command("kwriteconfig")
 
         subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpProxy", f"http://{self.ip_address} {self.port}"])
-        subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpsProxy", f"https://{self.ip_address} {self.port}"])
+        subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpsProxy", f"http://{self.ip_address} {self.port}"])
         subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ftpProxy", f"ftp://{self.ip_address} {self.port}"])
 
     def __set_gnome_proxy(self):
@@ -208,11 +208,11 @@ class LinuxProxy:
         with open(env_file_path, "w") as f:
             # https://www.freedesktop.org/software/systemd/man/latest/environment.d.html
             f.write(f"http_proxy=http://{self.ip_address}:{self.port}\n")
-            f.write(f"https_proxy=https://{self.ip_address}:{self.port}\n")
+            f.write(f"https_proxy=http://{self.ip_address}:{self.port}\n")
             f.write(f"ftp_proxy=ftp://{self.ip_address}:{self.port}\n")
             f.write(f"rsync_proxy=rsync://{self.ip_address}:{self.port}\n")
             f.write(f"HTTP_PROXY=http://{self.ip_address}:{self.port}\n")
-            f.write(f"HTTPS_PROXY=https://{self.ip_address}:{self.port}\n")
+            f.write(f"HTTPS_PROXY=http://{self.ip_address}:{self.port}\n")
             f.write(f"FTP_PROXY=ftp://{self.ip_address}:{self.port}\n")
             f.write(f"RSYNC_PROXY=rsync://{self.ip_address}:{self.port}\n")
 
