@@ -29,7 +29,7 @@ class LinuxProxy:
     def set_proxy(self):
         if self.__is_kde:
             self.__set_kde_proxy()
-        elif self.__is_gnome:
+        if self.__is_gnome or self.__is_kde:
             self.__set_gnome_proxy()
 
         if self.get_enable():
@@ -39,7 +39,7 @@ class LinuxProxy:
         if self.__is_kde:
             kde_command = self.__get_kde_command("kwriteconfig")
             subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ProxyType", "1" if is_enable else "0"])
-        elif self.__is_gnome:
+        if self.__is_gnome or self.__is_kde:
             subprocess.run(["gsettings", "set", "org.gnome.system.proxy", "mode", "manual" if is_enable else "none"])
 
         if is_enable:
@@ -68,7 +68,7 @@ class LinuxProxy:
         if self.__is_kde:
             kde_command = self.__get_kde_command("kwriteconfig")
             subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "NoProxyFor", ','.join(domains)])
-        elif self.__is_gnome:
+        if self.__is_gnome or self.__is_kde:
             subprocess.run(["gsettings", "set", "org.gnome.system.proxy", "ignore-hosts", self.format_domains(domains)])
 
         if self.get_enable():
@@ -177,10 +177,10 @@ class LinuxProxy:
                 subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpProxy", ""], check=True)
                 subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpsProxy", ""], check=True)
                 subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ftpProxy", ""], check=True)
-                subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "NoProxyFor", ""], check=True)
+                subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "NoProxyFor", "localhost,127.0.0.0/8,::1"], check=True)
             except subprocess.CalledProcessError as e:
                 print(f"Error deleting proxy: {e}")
-        elif self.__is_gnome:
+        if self.__is_gnome or self.__is_kde:
             try:
                 subprocess.run(["gsettings", "set", "org.gnome.system.proxy", "mode", "none"], check=True)
                 subprocess.run(["gsettings", "reset", "org.gnome.system.proxy.http", "host"], check=True)
