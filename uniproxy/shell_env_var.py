@@ -49,6 +49,7 @@ class ShellEnvVar:
         """
         Sets the proxy environment variables in supported shell configuration files
         """
+        self.unset_proxy_env_var()
         for shell in self.shells:
             if not shell["installed"]:
                 continue
@@ -126,6 +127,7 @@ class ShellEnvVar:
         """
         Sets the no_proxy and NO_PROXY environment variables in supported shell configuration
         """
+        self.unset_bypass_domains_env_var()
         for shell in self.shells:
             if not shell["installed"]:
                 continue
