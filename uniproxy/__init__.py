@@ -16,11 +16,31 @@ if platform.system().lower() == "windows":
 
 class Uniproxy:
     def __init__(self, ip: str, port: int):
-        self.ip_address = ip
-        self.port       = port
-        self.proxy      = self.__get_proxy_instance()
+        self._ip_address = ip
+        self._port = port
+        self.proxy = self.__get_proxy_instance()
         if not self.__check_connection():
             warnings.warn("Unable to bind to the specified IP and Port.\nPlease check if the IP and Port are correct\n and port is not already in use.")
+
+    @property
+    def ip_address(self):
+        return self._ip_address
+
+    @ip_address.setter
+    def ip_address(self, value):
+        self._ip_address = value
+        if hasattr(self, 'proxy'):
+            self.proxy.ip_address = value
+
+    @property
+    def port(self):
+        return self._port
+
+    @port.setter
+    def port(self, value):
+        self._port = value
+        if hasattr(self, 'proxy'):
+            self.proxy.port = value
 
     def __check_connection(self):
         try:
