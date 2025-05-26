@@ -119,37 +119,37 @@ class WinProxy:
     def set_proxy_env_var(self):
         self.unset_proxy_env_var()
         try:
-            subprocess.run(["setx", "http_proxy", f"http://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
-            subprocess.run(["setx", "HTTP_PROXY", f"http://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
-            subprocess.run(["setx", "https_proxy", f"http://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
-            subprocess.run(["setx", "HTTPS_PROXY", f"http://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
-            subprocess.run(["setx", "ftp_proxy", f"ftp://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
-            subprocess.run(["setx", "FTP_PROXY", f"ftp://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
+            subprocess.run(["setx", "http_proxy", f"http://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            subprocess.run(["setx", "HTTP_PROXY", f"http://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            subprocess.run(["setx", "https_proxy", f"http://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            subprocess.run(["setx", "HTTPS_PROXY", f"http://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            subprocess.run(["setx", "ftp_proxy", f"ftp://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            subprocess.run(["setx", "FTP_PROXY", f"ftp://{self.ip_address}:{self.port}/"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
         except subprocess.CalledProcessError as e:
             raise ValueError(f"Unable to set proxy environment variables: {e}")
 
     def unset_proxy_env_var(self):
         try:
-            subprocess.run(["setx", "http_proxy", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
-            subprocess.run(["setx", "HTTP_PROXY", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
-            subprocess.run(["setx", "https_proxy", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
-            subprocess.run(["setx", "HTTPS_PROXY", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
-            subprocess.run(["setx", "ftp_proxy", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
-            subprocess.run(["setx", "FTP_PROXY", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
+            subprocess.run(["setx", "http_proxy", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            subprocess.run(["setx", "HTTP_PROXY", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            subprocess.run(["setx", "https_proxy", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            subprocess.run(["setx", "HTTPS_PROXY", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            subprocess.run(["setx", "ftp_proxy", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            subprocess.run(["setx", "FTP_PROXY", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
         except subprocess.CalledProcessError as e:
             raise ValueError(f"Unable to unset proxy environment variables: {e}")
 
     def set_bypass_domains_env_var(self):
         self.unset_bypass_domains_env_var()
         try:
-            subprocess.run(["setx", "no_proxy", f'"{",".join(self.get_bypass_domains())}"'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
-            subprocess.run(["setx", "NO_PROXY", f'"{",".join(self.get_bypass_domains())}"'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
+            subprocess.run(["setx", "no_proxy", f'"{",".join(self.get_bypass_domains())}"'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            subprocess.run(["setx", "NO_PROXY", f'"{",".join(self.get_bypass_domains())}"'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
         except subprocess.CalledProcessError as e:
             raise ValueError(f"Unable to set bypass domains environment variables: {e}")
 
     def unset_bypass_domains_env_var(self):
         try:
-            subprocess.run(["setx", "no_proxy", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
-            subprocess.run(["setx", "NO_PROXY", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, shell=True, check=True)
+            subprocess.run(["setx", "no_proxy", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+            subprocess.run(["setx", "NO_PROXY", ""], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
         except subprocess.CalledProcessError as e:
             raise ValueError(f"Unable to unset bypass domains environment variables: {e}")
