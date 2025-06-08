@@ -17,10 +17,10 @@ class LinuxProxy:
             raise OSError("This library requires GNOME or KDE desktop environment")
 
     def __is_gnome(self):
-        return os.environ.get("XDG_CURRENT_DESKTOP", "").lower() == "gnome"
+        return "gnome" in os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
 
     def __is_kde(self):
-        return os.environ.get("XDG_CURRENT_DESKTOP", "").lower() == "kde"
+        return "kde" in os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
 
     def __get_kde_command(self, command):
         kde_version = os.environ.get("KDE_SESSION_VERSION", "5")
@@ -261,4 +261,3 @@ class LinuxProxy:
             subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
         except subprocess.CalledProcessError as e:
             print(f"Error refreshing environment variable: {e}")
-
