@@ -14,11 +14,11 @@ class LinuxProxy:
         self.__is_kde = self.__is_kde()
 
         if not self.__is_gnome and not self.__is_kde:
-            raise OSError("This library requires GNOME or KDE desktop environment")
+            raise OSError("This library requires GNOME, KDE or Cinnamon desktop environment")
 
     def __is_gnome(self):
-        return "gnome" in os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
-
+        desktop = os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
+        return "gnome" in desktop or "cinnamon" in desktop
     def __is_kde(self):
         return "kde" in os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
 
