@@ -274,6 +274,10 @@ class LinuxProxy:
 
     def refresh_env_var(self):
         try:
-            subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
+            if os.environ.get('container') is not None:
+                # In flatpak sandbox, use flatpak-spawn --host
+                subprocess.run(["flatpak-spawn", "--host", "systemctl", "--user", "daemon-reload"], check=True)
+            else:
+                subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
         except subprocess.CalledProcessError as e:
             print(f"Error refreshing environment variable: {e}")
