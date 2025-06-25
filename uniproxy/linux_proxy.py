@@ -49,10 +49,10 @@ class LinuxProxy:
     def set_enable(self, is_enable):
         if self.__is_kde:
             kde_command = self.__get_kde_command("kwriteconfig")
-            subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ProxyType", "1" if is_enable else "0"])
+            self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ProxyType", "1" if is_enable else "0"])
         if self.__is_gnome or self.__is_kde:
             gsettings = self.__get_gsettings_command()
-            subprocess.run([gsettings, "set", "org.gnome.system.proxy", "mode", "manual" if is_enable else "none"])
+            self._run_command([gsettings, "set", "org.gnome.system.proxy", "mode", "manual" if is_enable else "none"])
 
         if is_enable:
             self.set_proxy_env_var()
@@ -63,26 +63,26 @@ class LinuxProxy:
 
     def __set_kde_proxy(self):
         kde_command = self.__get_kde_command("kwriteconfig")
-        subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpProxy", f"http://{self.ip_address} {self.port}"])
-        subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpsProxy", f"http://{self.ip_address} {self.port}"])
-        subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ftpProxy", f"ftp://{self.ip_address} {self.port}"])
+        self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpProxy", f"http://{self.ip_address} {self.port}"])
+        self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpsProxy", f"http://{self.ip_address} {self.port}"])
+        self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ftpProxy", f"ftp://{self.ip_address} {self.port}"])
 
     def __set_gnome_proxy(self):
         gsettings = self.__get_gsettings_command()
-        subprocess.run([gsettings, "set", "org.gnome.system.proxy.http", "host", self.ip_address])
-        subprocess.run([gsettings, "set", "org.gnome.system.proxy.http", "port", str(self.port)])
-        subprocess.run([gsettings, "set", "org.gnome.system.proxy.https", "host", self.ip_address])
-        subprocess.run([gsettings, "set", "org.gnome.system.proxy.https", "port", str(self.port)])
-        subprocess.run([gsettings, "set", "org.gnome.system.proxy.ftp", "host", self.ip_address])
-        subprocess.run([gsettings, "set", "org.gnome.system.proxy.ftp", "port", str(self.port)])
+        self._run_command([gsettings, "set", "org.gnome.system.proxy.http", "host", self.ip_address])
+        self._run_command([gsettings, "set", "org.gnome.system.proxy.http", "port", str(self.port)])
+        self._run_command([gsettings, "set", "org.gnome.system.proxy.https", "host", self.ip_address])
+        self._run_command([gsettings, "set", "org.gnome.system.proxy.https", "port", str(self.port)])
+        self._run_command([gsettings, "set", "org.gnome.system.proxy.ftp", "host", self.ip_address])
+        self._run_command([gsettings, "set", "org.gnome.system.proxy.ftp", "port", str(self.port)])
 
     def set_bypass_domains(self, domains: list[str]):
         if self.__is_kde:
             kde_command = self.__get_kde_command("kwriteconfig")
-            subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "NoProxyFor", ','.join(domains)])
+            self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "NoProxyFor", ','.join(domains)])
         if self.__is_gnome or self.__is_kde:
             gsettings = self.__get_gsettings_command()
-            subprocess.run([gsettings, "set", "org.gnome.system.proxy", "ignore-hosts", self.format_domains(domains)])
+            self._run_command([gsettings, "set", "org.gnome.system.proxy", "ignore-hosts", self.format_domains(domains)])
 
         if self.get_enable():
             self.set_bypass_domains_env_var()
@@ -99,18 +99,18 @@ class LinuxProxy:
     def get_enable(self):
         if self.__is_kde:
             kde_command = self.__get_kde_command("kreadconfig")
-            output = subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ProxyType"], capture_output=True, text=True)
+            output = self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ProxyType"], capture_output=True, text=True)
             return output.stdout.strip() == "1"
         elif self.__is_gnome:
             gsettings = self.__get_gsettings_command()
-            output = subprocess.run([gsettings, "get", "org.gnome.system.proxy", "mode"], capture_output=True, text=True)
+            output = self._run_command([gsettings, "get", "org.gnome.system.proxy", "mode"], capture_output=True, text=True)
             return output.stdout.strip() == "manual"
 
     def __get_kde_proxy(self):
         kde_command = self.__get_kde_command("kreadconfig")
-        http_proxy = subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpProxy"], capture_output=True, text=True).stdout.strip()
-        https_proxy = subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpsProxy"], capture_output=True, text=True).stdout.strip()
-        ftp_proxy = subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ftpProxy"], capture_output=True, text=True).stdout.strip()
+        http_proxy = self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpProxy"], capture_output=True, text=True).stdout.strip()
+        https_proxy = self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpsProxy"], capture_output=True, text=True).stdout.strip()
+        ftp_proxy = self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ftpProxy"], capture_output=True, text=True).stdout.strip()
 
         http_proxy_ip_address, http_proxy_port = self.extract_ip_and_port(http_proxy)
         https_proxy_ip_address, https_proxy_port = self.extract_ip_and_port(https_proxy)
@@ -133,12 +133,12 @@ class LinuxProxy:
 
     def __get_gnome_proxy(self):
         gsettings = self.__get_gsettings_command()
-        http_proxy_ip_address = subprocess.run([gsettings, "get", "org.gnome.system.proxy.http", "host"], capture_output=True, text=True).stdout.strip()
-        http_proxy_port = subprocess.run([gsettings, "get", "org.gnome.system.proxy.http", "port"], capture_output=True, text=True).stdout.strip()
-        https_proxy_ip_address = subprocess.run([gsettings, "get", "org.gnome.system.proxy.https", "host"], capture_output=True, text=True).stdout.strip()
-        https_proxy_port = subprocess.run([gsettings, "get", "org.gnome.system.proxy.https", "port"], capture_output=True, text=True).stdout.strip()
-        ftp_proxy_ip_address = subprocess.run([gsettings, "get", "org.gnome.system.proxy.ftp", "host"], capture_output=True, text=True).stdout.strip()
-        ftp_proxy_port = subprocess.run([gsettings, "get", "org.gnome.system.proxy.ftp", "port"], capture_output=True, text=True).stdout.strip()
+        http_proxy_ip_address = self._run_command([gsettings, "get", "org.gnome.system.proxy.http", "host"], capture_output=True, text=True).stdout.strip()
+        http_proxy_port = self._run_command([gsettings, "get", "org.gnome.system.proxy.http", "port"], capture_output=True, text=True).stdout.strip()
+        https_proxy_ip_address = self._run_command([gsettings, "get", "org.gnome.system.proxy.https", "host"], capture_output=True, text=True).stdout.strip()
+        https_proxy_port = self._run_command([gsettings, "get", "org.gnome.system.proxy.https", "port"], capture_output=True, text=True).stdout.strip()
+        ftp_proxy_ip_address = self._run_command([gsettings, "get", "org.gnome.system.proxy.ftp", "host"], capture_output=True, text=True).stdout.strip()
+        ftp_proxy_port = self._run_command([gsettings, "get", "org.gnome.system.proxy.ftp", "port"], capture_output=True, text=True).stdout.strip()
 
         return {
             "http": {
@@ -158,13 +158,13 @@ class LinuxProxy:
     def get_bypass_domains(self):
         if self.__is_kde:
             kde_command = self.__get_kde_command("kreadconfig")
-            output = subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "NoProxyFor"], capture_output=True, text=True)
+            output = self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "NoProxyFor"], capture_output=True, text=True)
             output = output.stdout.strip()
             bypass_domains = output.split(",") if output else []
             return bypass_domains
         elif self.__is_gnome:
             gsettings = self.__get_gsettings_command()
-            output = subprocess.run([gsettings, "get", "org.gnome.system.proxy", "ignore-hosts"], capture_output=True, text=True)
+            output = self._run_command([gsettings, "get", "org.gnome.system.proxy", "ignore-hosts"], capture_output=True, text=True)
             output = output.stdout.strip()
             return ast.literal_eval(output)
 
@@ -188,24 +188,24 @@ class LinuxProxy:
         if self.__is_kde:
             kde_command = self.__get_kde_command("kwriteconfig")
             try:
-                subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ProxyType", "0"], check=True)
-                subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpProxy", ""], check=True)
-                subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpsProxy", ""], check=True)
-                subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ftpProxy", ""], check=True)
-                subprocess.run([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "NoProxyFor", "localhost,127.0.0.0/8,::1"], check=True)
+                self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ProxyType", "0"], check=True)
+                self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpProxy", ""], check=True)
+                self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "httpsProxy", ""], check=True)
+                self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "ftpProxy", ""], check=True)
+                self._run_command([kde_command, "--file", "kioslaverc", "--group", "Proxy Settings", "--key", "NoProxyFor", "localhost,127.0.0.0/8,::1"], check=True)
             except subprocess.CalledProcessError as e:
                 print(f"Error deleting proxy: {e}")
         if self.__is_gnome or self.__is_kde:
             try:
                 gsettings = self.__get_gsettings_command()
-                subprocess.run([gsettings, "set", "org.gnome.system.proxy", "mode", "none"], check=True)
-                subprocess.run([gsettings, "reset", "org.gnome.system.proxy.http", "host"], check=True)
-                subprocess.run([gsettings, "reset", "org.gnome.system.proxy.http", "port"], check=True)
-                subprocess.run([gsettings, "reset", "org.gnome.system.proxy.https", "host"], check=True)
-                subprocess.run([gsettings, "reset", "org.gnome.system.proxy.https", "port"], check=True)
-                subprocess.run([gsettings, "reset", "org.gnome.system.proxy.ftp", "host"], check=True)
-                subprocess.run([gsettings, "reset", "org.gnome.system.proxy.ftp", "port"], check=True)
-                subprocess.run([gsettings, "reset", "org.gnome.system.proxy", "ignore-hosts"], check=True)
+                self._run_command([gsettings, "set", "org.gnome.system.proxy", "mode", "none"], check=True)
+                self._run_command([gsettings, "reset", "org.gnome.system.proxy.http", "host"], check=True)
+                self._run_command([gsettings, "reset", "org.gnome.system.proxy.http", "port"], check=True)
+                self._run_command([gsettings, "reset", "org.gnome.system.proxy.https", "host"], check=True)
+                self._run_command([gsettings, "reset", "org.gnome.system.proxy.https", "port"], check=True)
+                self._run_command([gsettings, "reset", "org.gnome.system.proxy.ftp", "host"], check=True)
+                self._run_command([gsettings, "reset", "org.gnome.system.proxy.ftp", "port"], check=True)
+                self._run_command([gsettings, "reset", "org.gnome.system.proxy", "ignore-hosts"], check=True)
             except subprocess.CalledProcessError as e:
                 print(f"Error deleting proxy: {e}")
 
@@ -281,3 +281,9 @@ class LinuxProxy:
                 subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
         except subprocess.CalledProcessError as e:
             print(f"Error refreshing environment variable: {e}")
+
+    def _run_command(self, cmd_list, **kwargs):
+        if os.environ.get('container') is not None:
+            # In flatpak sandbox, use flatpak-spawn --host
+            cmd_list = ["flatpak-spawn", "--host"] + cmd_list
+        return subprocess.run(cmd_list, **kwargs)
