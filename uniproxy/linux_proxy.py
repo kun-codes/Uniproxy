@@ -217,7 +217,11 @@ class LinuxProxy:
         Sets the proxy environment variables. Only works on Systemd based systems.
         """
         xdg_config_home_path = xdg_config_home()
-        env_file_path = os.path.join(xdg_config_home_path, "environment.d", "01-proxy.conf")
+        env_dir = os.path.join(xdg_config_home_path, "environment.d")
+        env_file_path = os.path.join(env_dir, "01-proxy.conf")
+
+        # Ensure the environment.d directory exists
+        os.makedirs(env_dir, exist_ok=True)
 
         self.unset_proxy_env_var()
 
